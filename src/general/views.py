@@ -168,6 +168,7 @@ class BaseAPIView(View):
 
 
 class IndexView(BaseAPIView):
+    # noinspection PyMethodMayBeStatic
     def get(self):
         return OrderedDict([
             ('sessions', url_for('general.sessions_view'))

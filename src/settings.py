@@ -1,5 +1,6 @@
 import os
 
+
 BLUEPRINTS = (
     'apps.users.urls.bp',
     'general.urls.bp',

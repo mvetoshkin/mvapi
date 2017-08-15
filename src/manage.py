@@ -1,7 +1,6 @@
 import time
 
 import click
-import flask
 from flask.cli import FlaskGroup
 from sqlalchemy import event
 from sqlalchemy.engine import Engine

@@ -1,8 +1,6 @@
 from datetime import datetime
-import time
 
-from sqlalchemy import Column, Integer, DateTime, inspect, event
-from sqlalchemy.engine import Engine
+from sqlalchemy import Column, Integer, DateTime, inspect
 
 from extensions import db
 from general.exceptions import NotFoundError
