@@ -1,0 +1,28 @@
+version: '2'
+services:
+  api:
+    build: .
+    command: python manage.py run --host=0.0.0.0
+    container_name: skeleton_flask_api
+    environment:
+      FLASK_DEBUG: 'true'
+      FLASK_SETTINGS: 'settings.py'
+    image: skeleton_flask_api
+    links:
+      - db
+    ports:
+      - '5000:5000'
+    volumes:
+      - ./src:/usr/src/app
+
+  db:
+    container_name: skeleton_flask_api_db
+    environment:
+      POSTGRES_USER: 'flask_api_user'
+      POSTGRES_PASSWORD: 'flask_api_password'
+      POSTGRES_DB: 'flask_api_db'
+    image: postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./db_data:/var/lib/postgresql/data
