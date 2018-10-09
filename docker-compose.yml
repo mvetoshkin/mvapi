@@ -9,8 +9,6 @@ services:
     image: flask_api
     links:
       - db
-    ports:
-      - '5000:5000'
     volumes:
       - ./src:/usr/src/app
 
@@ -19,7 +17,5 @@ services:
     container_name: flask_api_db
     env_file: secrets.env
     image: flask_api_db
-    ports:
-      - '5432:5432'
     volumes:
       - ./db_data:/var/lib/postgresql/data
