@@ -1,17 +1,18 @@
 from datetime import datetime, timedelta
 
-from flask import current_app
 import jwt
+from flask import current_app
 
-from .models import User
 from general.exceptions import JWTError
+from general.utils import JSONEncoder
+from .models import User
 
 
 class JSONWebToken:
     def __init__(self):
         settings = current_app.config.get('JWTAUTH_SETTINGS', {})
         self.__algorithm = settings.get('ALGORITHM', 'HS256')
-        self.__secret_key = current_app.config.get('SECRET_KEY')
+        self.__secret_key = current_app.config['SECRET_KEY']
 
         days = settings.get('EXPIRES', 365)
         self.expires = datetime.utcnow() + timedelta(days=days)
@@ -27,7 +28,9 @@ class JSONWebToken:
             'exp': self.expires
         }
 
-        encoded = jwt.encode(payload, self.__secret_key, self.__algorithm)
+        encoded = jwt.encode(payload, key=self.__secret_key,
+                             algorithm=self.__algorithm,
+                             json_encoder=JSONEncoder)
         return encoded.decode('utf-8')
 
     def get_user(self, token):
@@ -47,4 +50,4 @@ class JSONWebToken:
             msg = 'Invalid payload.'
             raise JWTError(msg)
 
-        return User.get(id_=user_id)
+        return User.get_auth_user(id_=user_id)

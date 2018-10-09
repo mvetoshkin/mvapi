@@ -1,4 +1,5 @@
 import importlib
+import logging
 import os
 
 from flask import Flask
@@ -22,7 +23,7 @@ class NoCommandException(Exception):
 
 
 class AppFactory:
-    app = None
+    __app = None
 
     def __init__(self, settings='FLASK_SETTINGS'):
         self.settings = os.environ.get(settings, False)
@@ -31,56 +32,79 @@ class AppFactory:
                 'Path to settings module is not found'
             )
 
+        self.extensions = {}
+
     def get_app(self, app_module_name, **kwargs):
-        self.app = Flask(app_module_name, **kwargs)
-        self.app.config.from_pyfile(self.settings)
-        self.app.session_interface = NoSessionInterface()
+        self.__app = Flask(app_module_name, **kwargs)
+        self.__app.config.from_pyfile(self.settings)
+        self.__app.session_interface = NoSessionInterface()
+
+        self.__register_converters()
+
+        if not self.__app.config['DEBUG']:
+            self.__app.logger.setLevel(logging.INFO)
+            del self.__app.logger.handlers[:]
+
+            log_frmt = '[%(asctime)s] %(levelname)s in %(module)s: %(message)s'
+
+            stream_handler = logging.StreamHandler()
+            stream_handler.setFormatter(logging.Formatter(log_frmt))
+            self.__app.logger.addHandler(stream_handler)
 
         self.__bind_extensions()
         self.__register_blueprints()
         self.__register_commands()
 
-        return self.app
+        return self.__app
 
     def __bind_extensions(self):
-        for ext_path in self.app.config.get('EXTENSIONS', ()):
+        for ext_path in self.__app.config.get('EXTENSIONS', ()):
             try:
                 obj = self.__import_object(ext_path)
             except ImportError:
-                raise NoExtensionException(
-                    'No {} extension found'.format(ext_path)
-                )
+                raise NoExtensionException(f'No {ext_path} extension found')
 
             if hasattr(obj, 'init_app'):
-                obj.init_app(self.app)
+                obj.init_app(self.__app)
             elif callable(obj):
-                obj(self.app)
+                obj(self.__app)
             else:
                 raise NoExtensionException(
-                    '{} extension has no init_app.'.format(ext_path)
+                    f'{ext_path} extension has no init_app.'
                 )
 
+            ext_name = ext_path.split('.')[-1]
+            if ext_name not in self.__app.extensions:
+                self.__app.extensions[ext_name] = obj
+
     def __register_blueprints(self):
-        for blueprint_path in self.app.config.get('BLUEPRINTS', ()):
+        for blueprint_path in self.__app.config.get('BLUEPRINTS', ()):
             try:
                 obj = self.__import_object(blueprint_path)
-                self.app.register_blueprint(obj)
+                self.__app.register_blueprint(obj)
 
             except ImportError:
                 raise NoExtensionException(
-                    'No {} blueprint found'.format(blueprint_path)
+                    f'No {blueprint_path} blueprint found'
                 )
 
     def __register_commands(self):
-        for commands_path in self.app.config.get('COMMANDS', ()):
+        for commands_path in self.__app.config.get('COMMANDS', ()):
             try:
                 obj = self.__import_object(commands_path)
-                obj(self.app)
+                obj(self.__app)
 
             except ImportError:
-                raise NoCommandException(
-                    'No {} command found'.format(commands_path)
-                )
+                raise NoCommandException(f'No {commands_path} command found')
+
+    def __register_converters(self):
+        for name, path in self.__app.config.get('CONVERTERS', ()):
+            try:
+                converter = self.__import_object(path)
+                self.__app.url_map.converters[name] = converter
+
+            except ImportError:
+                raise NoCommandException(f'No {name} converter found')
 
     @staticmethod
     def __import_object(path):

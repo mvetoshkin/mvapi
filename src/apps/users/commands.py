@@ -9,11 +9,11 @@ def users_group(app):
         """Users commands."""
         pass
 
-    @users.command('createadmin')
-    @click.option('--email', default=None, help='user email')
-    @click.option('--password', default=None, help='user password')
-    def add_admin_user(email, password):
+    @users.command('create_admin')
+    @click.option('--email', required=True, help='user email')
+    @click.option('--password', required=True, help='user password')
+    def create_admin(email, password):
         """Create an admin user."""
 
         u = User.create(email=email, password=password, is_admin=True)
-        print(u)
+        app.logger.info(u)

@@ -21,3 +21,7 @@ class UnauthorizedError(AppException):
 
 class JWTError(AppException):
     pass
+
+
+class AppValueError(AppException):
+    pass

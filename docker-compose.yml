@@ -1,13 +1,12 @@
-version: '2'
+version: '3'
 services:
   api:
     build: .
-    command: python manage.py run --host=0.0.0.0
-    container_name: skeleton_flask_api
-    environment:
-      FLASK_DEBUG: 'true'
-      FLASK_SETTINGS: 'settings.py'
-    image: skeleton_flask_api
+    container_name: flask_api
+    depends_on:
+      - db
+    env_file: secrets.env
+    image: flask_api
     links:
       - db
     ports:
@@ -16,12 +15,10 @@ services:
       - ./src:/usr/src/app
 
   db:
-    container_name: skeleton_flask_api_db
-    environment:
-      POSTGRES_USER: 'flask_api_user'
-      POSTGRES_PASSWORD: 'flask_api_password'
-      POSTGRES_DB: 'flask_api_db'
-    image: postgres
+    build: ./postgres
+    container_name: flask_api_db
+    env_file: secrets.env
+    image: flask_api_db
     ports:
       - '5432:5432'
     volumes:

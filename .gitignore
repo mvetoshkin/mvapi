@@ -1,6 +1,7 @@
 .idea
 .tmp
 
-db_data
-
 *.pyc
+
+db_data
+secrets.env
