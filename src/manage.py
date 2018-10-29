@@ -49,7 +49,7 @@ def create_app(script_info=None):
 
     @app.errorhandler(500)
     def error_500_handler(error):
-        return app_error_response('unknown error', 500, error)
+        return app_error_response('unknown error', error.code, error)
 
     if app.config['DEBUG_SQL']:
         # noinspection PyUnusedLocal
