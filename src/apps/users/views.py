@@ -1,7 +1,6 @@
 from collections import OrderedDict
 
-from general.decorators import (auth_required, owner_required,
-                                json_payload_required)
+from general.decorators import owner_required, json_payload_required
 from general.exceptions import BadRequestError, NotFoundError, UnauthorizedError
 from general.views import BaseAPIView
 from .models import User
@@ -9,8 +8,7 @@ from .serializers import user_serializer, access_token_serializer
 
 
 class UsersView(BaseAPIView):
-    @auth_required
-    @owner_required
+    @owner_required()
     def get(self, user_id=None):
         if not user_id and not self.current_user.is_admin:
             raise NotFoundError
@@ -52,8 +50,7 @@ class UsersView(BaseAPIView):
             ('access_token', access_token_serializer(user))
         ])
 
-    @auth_required
-    @owner_required
+    @owner_required()
     @json_payload_required
     def put(self, user_id):
         user = User.get(id_=user_id)
@@ -68,8 +65,7 @@ class UsersView(BaseAPIView):
 
         return user_serializer(user, current_user=self.current_user)
 
-    @auth_required
-    @owner_required
+    @owner_required()
     def delete(self, user_id):
         user = User.get(id_=user_id)
         user.delete()
