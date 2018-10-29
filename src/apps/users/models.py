@@ -11,7 +11,7 @@ from general.models import BaseModel
 
 class User(BaseModel):
     email: Column = Column(String(64), nullable=False, unique=True, index=True)
-    password: Column = Column(String(64))
+    password: Column = Column(String(64), nullable=False)
     deleted: Column = Column(DateTime, index=True)
     is_admin: Column = Column(Boolean, nullable=False, default=False)
     first_name: Column = Column(String(50))
