@@ -47,7 +47,8 @@ def owner_required(keyword='user_id'):
             if not self.current_user:
                 raise AccessDeniedError
 
-            if not self.current_user.is_admin and self.current_user.id_ != user_id:
+            if (not self.current_user.is_admin and
+                    self.current_user.id_ != user_id):
                 raise AccessDeniedError
 
             return func(*args, **kwargs)
