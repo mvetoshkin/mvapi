@@ -100,7 +100,7 @@ class BaseModel(db.Model):
     def set_sort(cls, query, sort: str=None):
         if not sort:
             if not cls.default_sort:
-                return query.order_by(cls.id_.desc())
+                return query.order_by(cls.created_date.desc())
             return query.order_by(*cls.default_sort)
 
         sort_items = []
