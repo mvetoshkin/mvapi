@@ -16,8 +16,7 @@ class UsersView(BaseAPIView):
         if user_id:
             users = [User.get(id_=user_id)]
         else:
-            users = User.all(limit=self.limit, offset=self.offset,
-                             sort=self.request.args.get('sort'))
+            users = User.all(**self.common_args)
 
         return [user_serializer(user, current_user=self.current_user)
                 for user in users]

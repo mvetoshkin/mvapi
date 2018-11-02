@@ -37,6 +37,14 @@ class BaseAPIView(View):
     def offset(self):
         return self.limit * (self.current_page - 1) if self.limit else 0
 
+    @property
+    def common_args(self):
+        return {
+            'limit': self.limit,
+            'offset': self.offset,
+            'sort': self.request.args.get('sort')
+        }
+
     def __render(self, data):
         self.add_header('Content-Type', 'application/json; charset=utf-8')
 
