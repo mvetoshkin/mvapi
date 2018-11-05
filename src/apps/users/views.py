@@ -1,7 +1,7 @@
 from collections import OrderedDict
 
 from general.decorators import owner_required
-from general.exceptions import BadRequestError, NotFoundError, UnauthorizedError
+from general.exceptions import NotFoundError, UnauthorizedError
 from general.views import BaseAPIView
 from .models import User
 from .serializers import user_serializer, access_token_serializer
