@@ -22,14 +22,7 @@ class UsersView(BaseAPIView):
                 for user in users]
 
     def post(self):
-        try:
-            kwargs = {
-                'email': self.json_data['email'],
-                'password': self.json_data['password']
-            }
-
-        except KeyError:
-            raise BadRequestError
+        kwargs = self.available_json_data(required={'email', 'password'})
 
         try:
             user = User.find_by_email(email=kwargs['email'])
@@ -70,18 +63,14 @@ class UsersView(BaseAPIView):
 
 class SessionsView(BaseAPIView):
     def post(self):
-        try:
-            email = self.json_data['email']
-            password = self.json_data['password']
-        except KeyError:
-            raise BadRequestError
+        kwargs = self.available_json_data(required={'email', 'password'})
 
         try:
-            user = User.find_by_email(email=email, check_all=True)
+            user = User.find_by_email(email=kwargs['email'], check_all=True)
         except NotFoundError:
             raise UnauthorizedError
 
-        if not user.passwords_matched(password=password):
+        if not user.passwords_matched(password=kwargs['password']):
             raise UnauthorizedError
 
         return OrderedDict([

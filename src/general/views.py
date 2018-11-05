@@ -213,10 +213,15 @@ class BaseAPIView(View):
     def add_location_header(self, url):
         self.add_header('Location', url)
 
-    def available_json_data(self, include=None, exclude=None):
+    def available_json_data(self, include=None, exclude=None, required=None):
         exclude_columns = {'id_', 'created_date', 'modified_date'}
         exclude_columns -= include or set()
         exclude_columns |= exclude or set()
+
+        if required:
+            for key in required:
+                if key not in self.json_data:
+                    raise BadRequestError
 
         return {k: deepcopy(v) for k, v in self.json_data.items()
                 if k not in exclude_columns}
