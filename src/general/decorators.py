@@ -1,9 +1,6 @@
 from functools import wraps
 
-from flask import request
-from werkzeug.exceptions import BadRequest
-
-from .exceptions import AccessDeniedError, UnauthorizedError, BadRequestError
+from .exceptions import AccessDeniedError, UnauthorizedError
 
 
 def auth_required(func):
@@ -55,16 +52,3 @@ def owner_required(keyword='user_id'):
 
         return decorated_view
     return decorator
-
-
-def json_payload_required(func):
-    @wraps(func)
-    def decorated_view(*args, **kwargs):
-        try:
-            # noinspection PyStatementEffect
-            request.json
-        except BadRequest:
-            raise BadRequestError
-        return func(*args, **kwargs)
-
-    return decorated_view

@@ -6,6 +6,7 @@ from copy import deepcopy
 from flask import request, current_app, make_response, stream_with_context
 from flask.views import View
 from flask_login import UserMixin, current_user
+from werkzeug.exceptions import BadRequest
 from werkzeug.wrappers import Response
 
 from apps.users.jsonwebtoken import JWTError, JSONWebToken
@@ -25,6 +26,7 @@ class BaseAPIView(View):
     current_user: User = None
     logger = None
     request = None
+    json_data = None
     raw_response = False
     file_metadata = None
 
@@ -114,10 +116,25 @@ class BaseAPIView(View):
         para = '&'.join([f'{k}={v}' for k, v in q_params.items()])
         return f'{base}?{para}'
 
+    def __process_json_data(self):
+        data = {}
+
+        try:
+            json_data = self.request.json or {}
+        except BadRequest:
+            return data
+
+        for key, value in json_data.items():
+            func = getattr(self, f'process_{key}_value', None)
+            data[key] = func(value) if func else value
+
+        return data
+
     def dispatch_request(self, *args, **kwargs):
         self.current_app = current_app
         self.logger = self.current_app.logger
         self.request = request
+        self.json_data = self.__process_json_data()
         self.raw_response = False
 
         method = getattr(self, self.request.method.lower(), None)
@@ -201,7 +218,7 @@ class BaseAPIView(View):
         exclude_columns -= include or set()
         exclude_columns |= exclude or set()
 
-        return {k: deepcopy(v) for k, v in self.request.json.items()
+        return {k: deepcopy(v) for k, v in self.json_data.items()
                 if k not in exclude_columns}
 
 

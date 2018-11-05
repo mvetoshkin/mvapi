@@ -1,6 +1,6 @@
 from collections import OrderedDict
 
-from general.decorators import owner_required, json_payload_required
+from general.decorators import owner_required
 from general.exceptions import BadRequestError, NotFoundError, UnauthorizedError
 from general.views import BaseAPIView
 from .models import User
@@ -21,12 +21,11 @@ class UsersView(BaseAPIView):
         return [user_serializer(user, current_user=self.current_user)
                 for user in users]
 
-    @json_payload_required
     def post(self):
         try:
             kwargs = {
-                'email': self.request.json['email'],
-                'password': self.request.json['password']
+                'email': self.json_data['email'],
+                'password': self.json_data['password']
             }
 
         except KeyError:
@@ -50,7 +49,6 @@ class UsersView(BaseAPIView):
         ])
 
     @owner_required()
-    @json_payload_required
     def put(self, user_id):
         user = User.get(id_=user_id)
 
@@ -71,24 +69,19 @@ class UsersView(BaseAPIView):
 
 
 class SessionsView(BaseAPIView):
-    @json_payload_required
     def post(self):
         try:
-            email = self.request.json['email']
+            email = self.json_data['email']
+            password = self.json_data['password']
         except KeyError:
             raise BadRequestError
-
-        password = self.request.json.get('password')
-        if not password:
-            if not self.current_user or not self.current_user.is_admin:
-                raise BadRequestError
 
         try:
             user = User.find_by_email(email=email, check_all=True)
         except NotFoundError:
             raise UnauthorizedError
 
-        if password and not user.passwords_matched(password=password):
+        if not user.passwords_matched(password=password):
             raise UnauthorizedError
 
         return OrderedDict([
