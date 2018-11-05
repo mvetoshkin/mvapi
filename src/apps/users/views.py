@@ -22,15 +22,15 @@ class UsersView(BaseAPIView):
                 for user in users]
 
     def post(self):
-        kwargs = self.available_json_data(required={'email', 'password'})
+        data = self.available_json_data(required={'email', 'password'})
 
         try:
-            user = User.find_by_email(email=kwargs['email'])
-            if not user.passwords_matched(password=kwargs['password']):
+            user = User.find_by_email(email=data['email'])
+            if not user.passwords_matched(password=data['password']):
                 raise UnauthorizedError
             self.status = 200
         except NotFoundError:
-            user = User.create(**kwargs)
+            user = User.create(**data)
 
         user_resp = user_serializer(user, current_user=user)
         if self.status == 201:
@@ -63,14 +63,14 @@ class UsersView(BaseAPIView):
 
 class SessionsView(BaseAPIView):
     def post(self):
-        kwargs = self.available_json_data(required={'email', 'password'})
+        data = self.available_json_data(required={'email', 'password'})
 
         try:
-            user = User.find_by_email(email=kwargs['email'], check_all=True)
+            user = User.find_by_email(email=data['email'], check_all=True)
         except NotFoundError:
             raise UnauthorizedError
 
-        if not user.passwords_matched(password=kwargs['password']):
+        if not user.passwords_matched(password=data['password']):
             raise UnauthorizedError
 
         return OrderedDict([
