@@ -134,7 +134,6 @@ class BaseAPIView(View):
         self.current_app = current_app
         self.logger = self.current_app.logger
         self.request = request
-        self.json_data = self.__process_json_data()
         self.raw_response = False
 
         method = getattr(self, self.request.method.lower(), None)
@@ -159,6 +158,8 @@ class BaseAPIView(View):
         try:
             if current_user.is_authenticated:
                 self.current_user = current_user.user
+
+            self.json_data = self.__process_json_data()
 
             data = method(*args, **kwargs)
             db.session.commit()
