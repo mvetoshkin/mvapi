@@ -5,7 +5,8 @@ from sqlalchemy import Column, String, Boolean, DateTime
 from sqlalchemy.orm import validates
 from validate_email import validate_email
 
-from general.exceptions import NotFoundError, AppValueError
+from general.decorators import get_one
+from general.exceptions import AppValueError
 from general.models import BaseModel
 
 
@@ -67,12 +68,7 @@ class User(BaseModel):
         return cls.get(id_=id_, query=query)
 
     @classmethod
+    @get_one
     def find_by_email(cls, email, check_all=False):
         query = cls.session.query(cls) if check_all else cls.get_query()
-        query = query.filter(cls.email == email)
-
-        user = query.first()
-        if not user:
-            raise NotFoundError
-
-        return user
+        return query.filter(cls.email == email)

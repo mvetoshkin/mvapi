@@ -6,7 +6,8 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import ColumnProperty, RelationshipProperty
 
 from extensions import db
-from general.exceptions import NotFoundError, BadRequestError
+from general.decorators import get_one
+from general.exceptions import BadRequestError
 from general.utils import classproperty
 
 
@@ -152,15 +153,10 @@ class BaseModel(db.Model):
         return query.order_by(*order_fields)
 
     @classmethod
+    @get_one
     def get(cls, id_, query=None):
         query = query or cls.get_query()
-        query = query.filter(cls.id_ == id_)
-
-        record = query.first()
-        if not record:
-            raise NotFoundError
-
-        return record
+        return query.filter(cls.id_ == id_)
 
     @classmethod
     def find(cls, ids, query=None):

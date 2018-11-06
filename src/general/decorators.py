@@ -1,6 +1,6 @@
 from functools import wraps
 
-from .exceptions import AccessDeniedError, UnauthorizedError
+from .exceptions import AccessDeniedError, UnauthorizedError, NotFoundError
 
 
 def auth_required(func):
@@ -52,3 +52,17 @@ def owner_required(keyword='user_id'):
 
         return decorated_view
     return decorator
+
+
+def get_one(func):
+    @wraps(func)
+    def decorated_view(*args, **kwargs):
+        query = func(*args, **kwargs)
+
+        record = query.first()
+        if not record:
+            raise NotFoundError
+
+        return record
+
+    return decorated_view
