@@ -36,10 +36,7 @@ class UsersView(BaseAPIView):
         if self.status == 201:
             self.add_location_header(user_resp['url'])
 
-        return OrderedDict([
-            ('user', user_resp),
-            ('access_token', access_token_serializer(user))
-        ])
+        return user_resp
 
     @owner_required()
     def put(self, user_id):
