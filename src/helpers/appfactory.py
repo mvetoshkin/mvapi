@@ -32,8 +32,6 @@ class AppFactory:
                 'Path to settings module is not found'
             )
 
-        self.extensions = {}
-
     def get_app(self, app_module_name, **kwargs):
         self.__app = Flask(app_module_name, **kwargs)
         self.__app.config.from_pyfile(self.settings)
