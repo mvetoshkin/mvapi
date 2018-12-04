@@ -64,7 +64,7 @@ class User(BaseModel):
 
     @classmethod
     def get_auth_user(cls, id_):
-        query = cls.session.query(cls)
+        query = cls.get_query()
         return cls.get(id_=id_, query=query)
 
     @classmethod
