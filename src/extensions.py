@@ -23,4 +23,4 @@ def sentry(app):
         event_level=logging.ERROR
     )
 
-    sentry_sdk.init(integrations=[sentry_logging, FlaskIntegration])
+    sentry_sdk.init(integrations=[sentry_logging, FlaskIntegration()])
