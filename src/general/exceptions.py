@@ -25,3 +25,7 @@ class JWTError(AppException):
 
 class AppValueError(AppException):
     pass
+
+
+class UnexpectedArguments(AppException):
+    pass

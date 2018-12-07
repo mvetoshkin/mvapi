@@ -13,8 +13,8 @@ from apps.users.jsonwebtoken import JWTError, JSONWebToken
 from apps.users.models import User
 from extensions import db, login_manager
 from .exceptions import (BadRequestError, NotFoundError, AccessDeniedError,
-                         UnauthorizedError, AppValueError)
-from .utils import url_for, JSONEncoder
+                         UnauthorizedError, AppValueError, UnexpectedArguments)
+from .utils import url_for, JSONEncoder, check_kwargs
 
 
 class BaseAPIView(View):
@@ -161,6 +161,7 @@ class BaseAPIView(View):
 
             self.json_data = self.__process_json_data()
 
+            check_kwargs(method, kwargs)
             data = method(*args, **kwargs)
             db.session.commit()
 
@@ -179,7 +180,7 @@ class BaseAPIView(View):
             data = {'error': e.message or 'access denied'}
             is_error = True
 
-        except NotFoundError as e:
+        except (NotFoundError, UnexpectedArguments) as e:
             self.status = 404
             data = {'error': e.message or 'not found'}
             is_error = True

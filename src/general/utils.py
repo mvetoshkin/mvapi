@@ -1,4 +1,5 @@
 import enum
+import inspect
 import json
 import re
 from datetime import datetime
@@ -7,6 +8,8 @@ from uuid import UUID
 import pytz
 from flask import current_app
 from flask import url_for as uf
+
+from .exceptions import UnexpectedArguments
 
 
 # noinspection PyPep8Naming
@@ -44,3 +47,14 @@ def url_for(endpoint, **kwargs):
 
 def isoformat(timestamp):
     return timestamp.replace(tzinfo=pytz.UTC).isoformat()
+
+
+def check_kwargs(func, kwargs):
+    spec = inspect.getfullargspec(func)
+    unexpected_args = set(kwargs.keys()) - set(spec.args)
+    if len(unexpected_args) != 0:
+        args = ','.join(unexpected_args)
+        plural = '' if len(unexpected_args) == 1 else 's'
+
+        raise UnexpectedArguments(f'{func.__name__}() got an unexpected '
+                                  f'keyword argument{plural} {args}')
