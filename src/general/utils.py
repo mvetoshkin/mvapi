@@ -50,8 +50,8 @@ def isoformat(timestamp):
 
 
 def check_kwargs(func, kwargs):
-    spec = inspect.getfullargspec(func)
-    unexpected_args = set(kwargs.keys()) - set(spec.args)
+    spec = inspect.signature(func)
+    unexpected_args = set(kwargs.keys()) - set(spec.parameters)
     if len(unexpected_args) != 0:
         args = ','.join(unexpected_args)
         plural = '' if len(unexpected_args) == 1 else 's'

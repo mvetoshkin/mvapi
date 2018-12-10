@@ -180,9 +180,14 @@ class BaseAPIView(View):
             data = {'error': e.message or 'access denied'}
             is_error = True
 
-        except (NotFoundError, UnexpectedArguments) as e:
+        except NotFoundError as e:
             self.status = 404
             data = {'error': e.message or 'not found'}
+            is_error = True
+
+        except UnexpectedArguments:
+            self.status = 404
+            data = {'error': 'not found'}
             is_error = True
 
         except Exception as e:
