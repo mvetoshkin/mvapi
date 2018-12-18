@@ -56,7 +56,11 @@ class BaseAPIView(View):
             data_exists = False
             if data is not None:
                 data_exists = True
+
                 if not isinstance(data, list):
+                    if self.status == 201 and 'url' in data:
+                        self.add_location_header(data['url'])
+
                     data = [data]
 
                 if (self.limit and not self.next_page and
@@ -187,7 +191,7 @@ class BaseAPIView(View):
 
         except UnexpectedArguments:
             self.status = 404
-            data = {'error': 'not found'}
+            data = {'error': 'nost found'}
             is_error = True
 
         except Exception as e:

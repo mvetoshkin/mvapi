@@ -32,11 +32,7 @@ class UsersView(BaseAPIView):
         except NotFoundError:
             user = User.create(**data)
 
-        user_resp = user_serializer(user, current_user=user)
-        if self.status == 201:
-            self.add_location_header(user_resp['url'])
-
-        return user_resp
+        return user_serializer(user, current_user=user)
 
     @owner_required()
     def put(self, user_id):
