@@ -7,7 +7,7 @@ from sqlalchemy.orm import ColumnProperty, RelationshipProperty
 
 from extensions import db
 from general.decorators import get_one
-from general.exceptions import BadRequestError
+from general.exceptions import ModelKeyError
 from general.utils import classproperty
 
 
@@ -66,10 +66,12 @@ class BaseModel(db.Model):
         remaining_attrs = list(set(kwargs.keys()) - used_columns)
         if remaining_attrs:
             if len(remaining_attrs) == 1:
-                raise KeyError(f'Attribute {remaining_attrs[0]} doesn\'t exist')
+                raise ModelKeyError(
+                    f'Attribute {remaining_attrs[0]} doesn\'t exist'
+                )
             else:
                 attrs = ', '.join(remaining_attrs)
-                raise KeyError(f'Attributes {attrs} don\'t exist')
+                raise ModelKeyError(f'Attributes {attrs} don\'t exist')
 
         return self
 
@@ -134,7 +136,7 @@ class BaseModel(db.Model):
             })
 
         if sort_cols & cls.available_columns != sort_cols:
-            raise BadRequestError
+            raise ModelKeyError
 
         order_fields = []
         for item in sort_items:

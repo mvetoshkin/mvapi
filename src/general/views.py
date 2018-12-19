@@ -13,7 +13,8 @@ from apps.users.jsonwebtoken import JWTError, JSONWebToken
 from apps.users.models import User
 from extensions import db, login_manager
 from .exceptions import (BadRequestError, NotFoundError, AccessDeniedError,
-                         UnauthorizedError, AppValueError, UnexpectedArguments)
+                         UnauthorizedError, AppValueError, UnexpectedArguments,
+                         ModelKeyError)
 from .utils import url_for, JSONEncoder, check_kwargs
 
 
@@ -169,7 +170,7 @@ class BaseAPIView(View):
             data = method(*args, **kwargs)
             db.session.commit()
 
-        except (BadRequestError, AppValueError) as e:
+        except (BadRequestError, AppValueError, ModelKeyError) as e:
             self.status = 400
             data = {'error': e.message or 'bad request'}
             is_error = True

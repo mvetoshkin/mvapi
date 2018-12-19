@@ -29,3 +29,7 @@ class AppValueError(AppException):
 
 class UnexpectedArguments(AppException):
     pass
+
+
+class ModelKeyError(AppException):
+    pass
