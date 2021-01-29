@@ -1,7 +1,10 @@
+.DS_Store
 .idea
-.tmp
+.venv
 
+*.egg
+*.egg-info/
+*.env
 *.pyc
 
-db_data
-secrets.env
+http-client.private.env.json

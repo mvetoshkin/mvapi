@@ -1,6 +1,5 @@
 class AppException(Exception):
-    def __init__(self, message=None):
-        self.message = message
+    pass
 
 
 class NotFoundError(AppException):
@@ -16,6 +15,10 @@ class BadRequestError(AppException):
 
 
 class UnauthorizedError(AppException):
+    pass
+
+
+class NotAllowedError(AppException):
     pass
 
 
