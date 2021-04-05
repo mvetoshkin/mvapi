@@ -13,13 +13,20 @@ setup(
     description='Skeleton for a JSON API project',
     url='https://github.com/mvetoshkin/mvapi',
     packages=find_packages(),
+    entry_points={
+        'console_scripts': [
+            'mvapi = mvapi:main'
+        ]
+    },
     install_requires=[
+        'alembic>=1.5.4',
         'bcrypt>=3.2',
+        'click>=7.1.2',
         'python-dotenv>=0.15',
         'Flask>=1.1',
         'Flask-Cors>=3.0',
-        'Flask-Migrate>=2.6',
         'Flask-SQLAlchemy>=2.4',
+        'psycopg2>=2.8',
         'PyJWT>=2.0',
         'shortuuid>=1.0',
         'SQLAlchemy>=1.3',

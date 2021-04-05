@@ -1,136 +1,109 @@
 import importlib
 import json
 import logging
-import os
 import time
 
-from dotenv import load_dotenv
 from flask import Flask, g
 from sqlalchemy import event
 from sqlalchemy.engine.base import Engine
 from werkzeug.exceptions import HTTPException
 
-from common.exceptions import AppException, BadRequestError, AppValueError, \
-    ModelKeyError, UnauthorizedError, AccessDeniedError, NotFoundError, \
-    UnexpectedArguments, NotAllowedError
-from common.extensions import db
-
-
-class NoSettingsModuleSpecified(Exception):
-    pass
-
-
-class NoBlueprintException(Exception):
-    pass
-
-
-class NoExtensionException(Exception):
-    pass
-
-
-class NoCommandException(Exception):
-    pass
+from mvapi.common.exceptions import ModelKeyError
+from mvapi.common.utils import get_app_name, get_app_path, get_settings, \
+    import_object
+from mvapi.web.common.exceptions import AccessDeniedError, AppException, \
+    AppValueError, BadRequestError, NoConverterException, \
+    NoExtensionException, NotAllowedError, NotFoundError, UnauthorizedError, \
+    UnexpectedArgumentsError
+from mvapi.web.common.extensions import db
 
 
 class AppFactory:
-    __app = None
+    __instance = None
+    app = None
 
-    def __init__(self, settings='FLASK_SETTINGS'):
-        self.settings = os.environ.get(settings, False)
-        if not self.settings:
-            raise NoSettingsModuleSpecified(
-                'Path to settings module is not found'
-            )
+    def __new__(cls):
+        if cls.__instance is None:
+            cls.__instance = super(AppFactory, cls).__new__(cls)
+            cls.__instance.__create_app()
 
-    def get_app(self, app_module_name, **kwargs):
-        self.__app = Flask(app_module_name, **kwargs)
-        self.__app.config.from_pyfile(self.settings)
+        return cls.__instance
+
+    def __create_app(self):
+        self.app = Flask(get_app_name(), instance_path=get_app_path())
+        self.app.config.from_object(get_settings())
 
         self.__register_converters()
 
-        if not self.__app.config['DEBUG']:
-            self.__app.logger.setLevel(logging.INFO)
-            del self.__app.logger.handlers[:]
+        if not self.app.config['DEBUG']:
+            self.app.logger.setLevel(logging.INFO)
+            del self.app.logger.handlers[:]
 
             log_frmt = '[%(asctime)s] %(levelname)s in %(module)s: %(message)s'
 
             stream_handler = logging.StreamHandler()
             stream_handler.setFormatter(logging.Formatter(log_frmt))
-            self.__app.logger.addHandler(stream_handler)
+            self.app.logger.addHandler(stream_handler)
 
         self.__bind_extensions()
         self.__register_blueprints()
-        self.__register_commands()
 
-        if 'EMAILS_MODULE' in self.__app.config:
-            importlib.import_module(self.__app.config['EMAILS_MODULE'])
-
-        return self.__app
+        if 'EMAILS_MODULE' in self.app.config:
+            importlib.import_module(self.app.config['EMAILS_MODULE'])
 
     def __bind_extensions(self):
-        for ext_path in self.__app.config.get('EXTENSIONS', ()):
+        extensions = self.app.config.get('EXTENSIONS', []) + [
+            'mvapi.web.common.extensions.cors',
+            'mvapi.web.common.extensions.db',
+        ]
+
+        for ext_path in extensions:
             try:
-                obj = self.__import_object(ext_path)
+                obj = import_object(ext_path)
             except ImportError:
                 raise NoExtensionException(f'No {ext_path} extension found')
 
             if hasattr(obj, 'init_app') and callable(obj.init_app):
-                obj.init_app(self.__app)
+                obj.init_app(self.app)
             elif callable(obj):
-                obj(self.__app)
+                obj(self.app)
             else:
                 raise NoExtensionException(
                     f'{ext_path} extension has no init_app.'
                 )
 
             ext_name = ext_path.split('.')[-1]
-            if ext_name not in self.__app.extensions:
-                self.__app.extensions[ext_name] = obj
+            if ext_name not in self.app.extensions:
+                self.app.extensions[ext_name] = obj
 
     def __register_blueprints(self):
-        for blueprint_path in self.__app.config.get('BLUEPRINTS', ()):
+        blueprints = self.app.config.get('BLUEPRINTS', []) + [
+            'mvapi.web.common.urls.general_bp',
+            'mvapi.web.common.urls.api_bp',
+        ]
+
+        for blueprint_path in blueprints:
             try:
-                obj = self.__import_object(blueprint_path)
-                self.__app.register_blueprint(obj)
+                obj = import_object(blueprint_path)
+                self.app.register_blueprint(obj)
 
             except ImportError:
                 raise NoExtensionException(
                     f'No {blueprint_path} blueprint found'
                 )
 
-    def __register_commands(self):
-        for commands_path in self.__app.config.get('COMMANDS', ()):
-            try:
-                obj = self.__import_object(commands_path)
-                obj(self.__app)
-
-            except ImportError:
-                raise NoCommandException(f'No {commands_path} command found')
-
     def __register_converters(self):
-        for name, path in self.__app.config.get('CONVERTERS', ()):
+        for name, path in self.app.config.get('CONVERTERS', ()):
             try:
-                converter = self.__import_object(path)
-                self.__app.url_map.converters[name] = converter
+                converter = import_object(path)
+                self.app.url_map.converters[name] = converter
 
             except ImportError:
-                raise NoCommandException(f'No {name} converter found')
-
-    @staticmethod
-    def __import_object(path):
-        module_name, object_name = path.rsplit('.', 1)
-        mod = importlib.import_module(module_name)
-        if not hasattr(mod, object_name):
-            raise ImportError
-
-        return getattr(mod, object_name)
+                raise NoConverterException(f'No {name} converter found')
 
 
-# noinspection PyUnusedLocal
-def create_app(script_info=None):
-    load_dotenv()
-
-    app = AppFactory().get_app(__name__)
+def create_app():
+    app = AppFactory().app
 
     @app.before_request
     def before_request():
@@ -163,7 +136,7 @@ def create_app(script_info=None):
 
         if not app.config['DEBUG'] and not (
                 isinstance(error, AppException) and
-                not isinstance(error, UnexpectedArguments)):
+                not isinstance(error, UnexpectedArgumentsError)):
             errors_text = default_text
 
         if status == 500:
@@ -191,7 +164,7 @@ def create_app(script_info=None):
         if isinstance(error, AccessDeniedError):
             return app_error_response(error, 403, 'Access denied')
 
-        if isinstance(error, (NotFoundError, UnexpectedArguments,)):
+        if isinstance(error, (NotFoundError, UnexpectedArgumentsError,)):
             return app_error_response(error, 404, 'Not found')
 
         if isinstance(error, NotAllowedError):
