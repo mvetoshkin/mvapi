@@ -2,8 +2,8 @@ import re
 
 from setuptools import find_packages, setup
 
-with open('./mvapi/__init__.py') as file:
-    version = re.search(r'__version__ = \'(.*?)\'', file.read()).group(1)
+with open('./mvapi/version.py') as file:
+    version = re.search(r'version = \'(.*?)\'', file.read()).group(1)
 
 setup(
     name='mvapi',
