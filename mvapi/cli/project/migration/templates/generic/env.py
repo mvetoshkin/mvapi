@@ -4,8 +4,8 @@ from alembic import context
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
-from mvapi.common.utils import get_settings
-
+from mvapi.models import BaseModel
+from mvapi.settings import settings
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -19,22 +19,19 @@ fileConfig(config.config_file_name)
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = None
+target_metadata = BaseModel.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 
-project_settings = get_settings()
-
-config.set_main_option('sqlalchemy.url',
-                       project_settings.get('SQLALCHEMY_DATABASE_URI'))
+config.set_main_option('sqlalchemy.url', settings.SQLALCHEMY_DATABASE_URI)
 
 
 # noinspection PyUnusedLocal
 def include_symbol(tablename, schema=None):
-    exclude_tables = project_settings.get('MIGRATIONS_EXCLUDE_TABLES', tuple())
+    exclude_tables = settings.get('MIGRATIONS_EXCLUDE_TABLES', tuple())
     return tablename not in exclude_tables
 
 

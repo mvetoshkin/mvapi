@@ -2,10 +2,7 @@ from flask import Blueprint
 
 from mvapi.web.views.api import APIView
 
-# General endpoins
-
 general_bp = Blueprint('general', __name__, url_prefix='/')
-
 
 # API endpoints
 

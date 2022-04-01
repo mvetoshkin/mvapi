@@ -5,17 +5,16 @@ class DefaultSettings:
     DEBUG = False
     DEBUG_SQL = False
     ENV = 'production'
+    ERRORS_PATH = '.errors'
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # noinspection PyPep8Naming
     @property
-    def SECRET_KEY(self):
-        return os.environ['MVAPI_SECRET_KEY']
-
-    # noinspection PyPep8Naming
-    @property
     def SQLALCHEMY_DATABASE_URI(self):
-        return 'postgresql://{}:{}@{}/{}'.format(
-            os.environ['DB_USER'], os.environ['DB_PASSWORD'],
-            os.environ['DB_HOST'], os.environ['DB_NAME'])
+        return self.DB_URI
+
+    def __getattr__(self, item):
+        if item in os.environ:
+            return os.environ[item]
+        raise KeyError

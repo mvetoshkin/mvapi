@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+  <title>{{ exc_value }}</title>
+
+  <style>
+      body {
+          font: 13px arial, sans-serif;
+          margin: 0;
+          padding: 0;
+      }
+
+      a {
+          color: #36c;
+          text-decoration: none;
+      }
+
+      a:hover {
+          text-decoration: underline;
+      }
+
+      header {
+          background-color: #c4e1ff;
+          padding: 10px;
+      }
+
+      .bold {
+          font-weight: bold;
+      }
+
+      .environment {
+          background: #ecf4fd;
+          padding: 10px;
+      }
+
+      .environment > .item {
+          margin-bottom: 10px;
+      }
+
+      .environment > .item > .caption {
+          display: inline-block;
+          margin-right: 10px;
+          text-align: right;
+          vertical-align: top;
+          width: 180px;
+      }
+
+      .environment > .item > .info {
+          display: inline-block;
+          width: 800px;
+      }
+
+      .traceback {
+          background: #fff;
+          padding: 10px;
+      }
+
+      .traceback > .caption {
+          font-size: 1.6em;
+          margin-bottom: 10px;
+      }
+
+      .traceback > .frame {
+          margin: 0 0 20px 20px;
+      }
+
+      .traceback > .frame > .info {
+          margin-bottom: 5px;
+      }
+
+      .traceback > .frame > .lines {
+          margin-left: 20px;
+          width: 1070px;
+      }
+
+      .traceback > .frame > .lines > .line {
+          font-size: 0.8em;
+          padding: 3px 0;
+      }
+
+      .traceback > .frame > .lines > .line:nth-child(odd) {
+          background: #eee;
+      }
+
+      .traceback > .frame > .lines > .line.current {
+          background: #c4e1ff;
+      }
+
+      .traceback > .frame > .lines > .line .lineno {
+          display: inline-block;
+          margin-right: 10px;
+          text-align: right;
+          width: 50px;
+      }
+
+      .traceback > .frame > .lines > .line .linecode {
+          display: inline-block;
+          white-space: pre;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          width: 1000px;
+      }
+
+      .traceback > .frame > .params {
+          font-size: 0.8em;
+      }
+
+      .traceback > .frame > .params > .caption {
+          color: #36c;
+          cursor: pointer;
+          margin: 5px 0 0 20px;
+      }
+
+      .traceback > .frame > .params > .variables {
+          display: none;
+      }
+
+      .traceback > .frame > .params.open > .variables {
+          display: block;
+      }
+
+      .traceback > .frame .variables {
+          margin: 5px 0 50px 60px;
+      }
+
+      .traceback > .frame .variable {
+          margin-bottom: 10px;
+      }
+
+      .traceback > .frame .variable > .name {
+          display: inline-block;
+          margin-right: 10px;
+          text-align: right;
+          vertical-align: top;
+          width: 100px;
+      }
+
+      .traceback > .frame .variable > .value {
+          display: inline-block;
+          width: 800px;
+      }
+  </style>
+
+  <script>
+      const toggle_variables = (event) => {
+          const parent = event.currentTarget.parentElement;
+          parent.classList.toggle('open');
+      };
+
+      window.addEventListener('load', () => {
+          document
+              .querySelectorAll('.toggle-variables')
+              .forEach((el) => el.addEventListener('click', toggle_variables));
+      });
+  </script>
+</head>
+
+<body>
+  <header>
+    <div class="bold" style="font-size: 1.6em;">{{ exc_type.__name__ }}</div>
+    <div>{{ exc_value }}</div>
+  </header>
+
+  <div class="environment">
+    <div class="item">
+      <span class="caption bold">Exception Type:</span>
+      <span class="info">{{ exc_type.__name__ }}</span>
+    </div>
+
+    <div class="item">
+      <span class="caption bold">Exception Value:</span>
+      <span class="info">{{ exc_value }}</span>
+    </div>
+
+    <div class="item">
+      <span class="caption bold">Exception Location:</span>
+      <span class="info">
+        {{ last_frame['filename'] }} in {{ last_frame['function'] }},
+        line {{ last_frame['lineno'] }}
+      </span>
+    </div>
+
+    <div class="item">
+      <span class="caption bold">Python Executable:</span>
+      <span class="info">{{ python_executable }}</span>
+    </div>
+
+    <div class="item">
+      <span class="caption bold">Python Version:</span>
+      <span class="info">
+        {{ python_version[0] }}.{{ python_version[1] }}.{{ python_version[2] }}
+      </span>
+    </div>
+
+    <div class="item">
+      <span class="caption bold">Python Path:</span>
+      <span class="info" style="white-space: pre-wrap;">{{ python_path }}</span>
+    </div>
+
+    <div class="item">
+      <span class="caption bold">Timestamp:</span>
+      <span class="info">{{ error_timestamp }}</span>
+    </div>
+  </div>
+
+  <div class="traceback">
+    <div class="caption bold">Traceback</div>
+
+    {% for frame in frames %}
+      <div class="frame">
+        <div class="info bold">
+          {{ frame['filename'] }} in {{ frame['function'] }}
+        </div>
+
+        <div class="lines">
+          {% for line in frame['file_lines'] %}
+            <div class="line {% if line[0] == frame['lineno'] %}current{% endif %}">
+              <span class="lineno">{{ line[0] }}.</span>
+              <span class="linecode">{{ line[1] }}</span>
+            </div>
+          {% endfor %}
+        </div>
+
+        <div class="params">
+          <div class="caption toggle-variables">Local variables</div>
+
+          <div class="variables">
+            {% for key, value in frame['vars'] %}
+              <div class="variable">
+                <span class="name bold">{{ key }}:</span>
+                <span class="value">{{ value }}</span>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</body>
+
+</html>

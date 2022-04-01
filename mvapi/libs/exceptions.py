@@ -14,3 +14,7 @@ class NoSettingsModuleSpecified(Exception):
 
 class ModelKeyError(AppException):
     pass
+
+
+class NotFoundError(AppException):
+    pass

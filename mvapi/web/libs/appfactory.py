@@ -1,21 +1,24 @@
 import importlib
 import json
 import logging
-import time
 
+import time
 from flask import Flask, g
 from sqlalchemy import event
 from sqlalchemy.engine.base import Engine
 from werkzeug.exceptions import HTTPException
 
-from mvapi.common.exceptions import ModelKeyError
-from mvapi.common.utils import get_app_name, get_app_path, get_settings, \
-    import_object
-from mvapi.web.common.exceptions import AccessDeniedError, AppException, \
+from mvapi.libs.database import db
+from mvapi.libs.error import save_error
+from mvapi.libs.exceptions import ModelKeyError, NotFoundError
+from mvapi.libs.misc import import_object
+from mvapi.settings import settings
+from mvapi.web.libs.exceptions import AccessDeniedError, AppException, \
     AppValueError, BadRequestError, NoConverterException, \
-    NoExtensionException, NotAllowedError, NotFoundError, UnauthorizedError, \
+    NoExtensionException, NotAllowedError, UnauthorizedError, \
     UnexpectedArgumentsError
-from mvapi.web.common.extensions import db
+
+logger = logging.getLogger(__name__)
 
 
 class AppFactory:
@@ -30,21 +33,10 @@ class AppFactory:
         return cls.__instance
 
     def __create_app(self):
-        self.app = Flask(get_app_name(), instance_path=get_app_path())
-        self.app.config.from_object(get_settings())
+        self.app = Flask(settings.APP_NAME)
+        self.app.config.from_object(settings)
 
         self.__register_converters()
-
-        if not self.app.config['DEBUG']:
-            self.app.logger.setLevel(logging.INFO)
-            del self.app.logger.handlers[:]
-
-            log_frmt = '[%(asctime)s] %(levelname)s in %(module)s: %(message)s'
-
-            stream_handler = logging.StreamHandler()
-            stream_handler.setFormatter(logging.Formatter(log_frmt))
-            self.app.logger.addHandler(stream_handler)
-
         self.__bind_extensions()
         self.__register_blueprints()
 
@@ -53,8 +45,7 @@ class AppFactory:
 
     def __bind_extensions(self):
         extensions = self.app.config.get('EXTENSIONS', []) + [
-            'mvapi.web.common.extensions.cors',
-            'mvapi.web.common.extensions.db',
+            'mvapi.web.libs.extensions.cors',
         ]
 
         for ext_path in extensions:
@@ -78,8 +69,8 @@ class AppFactory:
 
     def __register_blueprints(self):
         blueprints = self.app.config.get('BLUEPRINTS', []) + [
-            'mvapi.web.common.urls.general_bp',
-            'mvapi.web.common.urls.api_bp',
+            'mvapi.web.urls.general_bp',
+            'mvapi.web.urls.api_bp',
         ]
 
         for blueprint_path in blueprints:
@@ -105,20 +96,17 @@ class AppFactory:
 def create_app():
     app = AppFactory().app
 
-    @app.before_request
-    def before_request():
-        g.start = time.time()
+    if settings.DEBUG:
+        @app.before_request
+        def before_request():
+            g.start = time.time()
 
-    @app.after_request
-    def after_request(response):
-        diff = time.time() - g.start
-        app.logger.debug(f'Request finished in {diff}')
+        @app.after_request
+        def after_request(response):
+            diff = time.time() - g.start
+            logger.debug(f'Request finished in {diff}')
 
-        return response
-
-    @app.shell_context_processor
-    def make_shell_context():
-        return dict(app=app, db=db)
+            return response
 
     @app.teardown_appcontext
     def teardown_appcontext(exception):
@@ -134,13 +122,13 @@ def create_app():
 
         errors_text = '; '.join(error.args) if error.args else default_text
 
-        if not app.config['DEBUG'] and not (
+        if not settings.DEBUG and not (
                 isinstance(error, AppException) and
                 not isinstance(error, UnexpectedArgumentsError)):
             errors_text = default_text
 
         if status == 500:
-            app.logger.error(errors_text, exc_info=True)
+            logger.error(errors_text, exc_info=True)
 
         data = {
             'errors': errors_text.split('; '),
@@ -173,22 +161,24 @@ def create_app():
         if isinstance(error, HTTPException):
             return app_error_response(error, error.code, error.name)
 
+        save_error()
+
         return app_error_response(error, 500, 'Unknown error')
 
-    if app.config['DEBUG_SQL']:
+    if settings.DEBUG_SQL:
         # noinspection PyUnusedLocal
         @event.listens_for(Engine, 'before_cursor_execute')
         def before_cursor_execute(conn, cursor, statement, parameters, context,
                                   executemany):
             conn.info.setdefault('query_start_time', []).append(time.time())
-            app.logger.debug(f'Start Query: {statement}. '
-                             f'With parameters: {parameters}')
+            logger.debug(f'Start Query: {statement}. '
+                         f'With parameters: {parameters}')
 
         # noinspection PyUnusedLocal
         @event.listens_for(Engine, 'after_cursor_execute')
         def after_cursor_execute(conn, cursor, statement, parameters, context,
                                  executemany):
             total = time.time() - conn.info['query_start_time'].pop(-1)
-            app.logger.debug(f'Query Complete. Total Time: {str(total)}\n')
+            logger.debug(f'Query Complete. Total Time: {str(total)}\n')
 
     return app

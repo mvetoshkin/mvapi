@@ -1,4 +1,4 @@
-from mvapi.common.exceptions import AppException
+from mvapi.libs.exceptions import AppException
 
 
 class NoBlueprintException(Exception):
@@ -32,10 +32,6 @@ class JWTError(AppException):
 
 
 class NotAllowedError(AppException):
-    pass
-
-
-class NotFoundError(AppException):
     pass
 
 

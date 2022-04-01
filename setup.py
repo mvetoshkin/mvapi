@@ -11,7 +11,7 @@ setup(
     author='Mikhail Vetoshkin',
     author_email='mikhail@vetoshkin.dev',
     description='Skeleton for a JSON API project',
-    url='https://github.com/mvetoshkin/mvapi',
+    url='https://git.vetoshkin.dev/mvapi',
     packages=find_packages(),
     entry_points={
         'console_scripts': [
@@ -19,20 +19,18 @@ setup(
         ]
     },
     install_requires=[
-        'alembic>=1.5.4',
-        'bcrypt>=3.2',
-        'click>=7.1.2',
-        'python-dotenv>=0.15',
-        'Flask>=1.1',
-        'Flask-Cors>=3.0',
-        'Flask-SQLAlchemy>=2.4',
-        'psycopg2>=2.8',
-        'PyJWT>=2.0',
-        'shortuuid>=1.0',
-        'SQLAlchemy>=1.3',
-        'validate-email>=1.3',
-        'Werkzeug>=1.0'
+        'alembic == 1.7.5',
+        'bcrypt == 3.2.0',
+        'click == 8.0.1',
+        'flask == 2.0.2',
+        'flask-cors == 3.0.10',
+        'jinja2 == 3.0.2',
+        'psycopg2 == 2.9.3',
+        'pyjwt == 2.3.0',
+        'python-dotenv == 0.19.1',
+        'shortuuid == 1.0.8',
+        'sqlalchemy == 1.4.28',
+        'validate-email == 1.3',
     ],
-    python_requires='>=3.7',
+    python_requires='>=3.9',
 )
-

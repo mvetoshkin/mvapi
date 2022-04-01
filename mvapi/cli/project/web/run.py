@@ -1,6 +1,6 @@
 import click
 
-from mvapi.web.helpers.appfactory import create_app
+from mvapi.web.libs.appfactory import create_app
 
 
 @click.command('run', short_help='Run a development server')
