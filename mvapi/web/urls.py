@@ -2,10 +2,6 @@ from flask import Blueprint
 
 from mvapi.web.views.api import APIView
 
-general_bp = Blueprint('general', __name__, url_prefix='/')
-
-# API endpoints
-
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 view_func = APIView.as_view('api_view')
 

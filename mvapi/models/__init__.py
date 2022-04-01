@@ -1,3 +1,5 @@
+import importlib
+import os
 import re
 from datetime import datetime
 from uuid import uuid4
@@ -8,6 +10,7 @@ from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import Query
 
+from mvapi.settings import settings
 from mvapi.libs.database import db
 from mvapi.libs.exceptions import NotFoundError
 
@@ -82,3 +85,14 @@ class BaseModel(declarative_base()):
     def delete(self):
         db.session.delete(self)
         db.session.flush()
+
+
+def import_models():
+    models = [__package__] + settings.MODELS
+
+    for model_str in models:
+        model = importlib.import_module(model_str)
+        for file in os.listdir(os.path.dirname(model.__file__)):
+            if not file.startswith('__') and file.endswith('.py'):
+                name = file.rpartition('.')[0]
+                importlib.import_module(f'{model.__package__}.{name}')

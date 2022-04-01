@@ -8,7 +8,7 @@ from .utils import DIRECTORY, get_config
 @click.option('--directory', default=DIRECTORY,
               help='path to the migrations directory')
 @click.option('--message', help='message to apply to the revision')
-@click.option('--autogenerate', is_flag=True,
+@click.option('--autogenerate', is_flag=True, default=True,
               help='autogenerate the script from the database')
 @click.option('--sql', is_flag=True,
               help='dump the script out as a SQL string; when specified, '

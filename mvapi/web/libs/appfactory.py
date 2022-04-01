@@ -40,11 +40,11 @@ class AppFactory:
         self.__bind_extensions()
         self.__register_blueprints()
 
-        if 'EMAILS_MODULE' in self.app.config:
-            importlib.import_module(self.app.config['EMAILS_MODULE'])
+        if settings.EMAILS_MODULE:
+            importlib.import_module(settings.EMAILS_MODULE)
 
     def __bind_extensions(self):
-        extensions = self.app.config.get('EXTENSIONS', []) + [
+        extensions = settings.EXTENSIONS + [
             'mvapi.web.libs.extensions.cors',
         ]
 
@@ -68,8 +68,7 @@ class AppFactory:
                 self.app.extensions[ext_name] = obj
 
     def __register_blueprints(self):
-        blueprints = self.app.config.get('BLUEPRINTS', []) + [
-            'mvapi.web.urls.general_bp',
+        blueprints = settings.BLUEPRINTS + [
             'mvapi.web.urls.api_bp',
         ]
 
@@ -84,7 +83,7 @@ class AppFactory:
                 )
 
     def __register_converters(self):
-        for name, path in self.app.config.get('CONVERTERS', ()):
+        for name, path in settings.CONVERTERS:
             try:
                 converter = import_object(path)
                 self.app.url_map.converters[name] = converter

@@ -2,11 +2,15 @@ import os
 
 
 class DefaultSettings:
+    BLUEPRINTS = []
+    CONVERTERS = []
     DEBUG = False
     DEBUG_SQL = False
+    EMAILS_MODULE = None
     ENV = 'production'
     ERRORS_PATH = '.errors'
-
+    EXTENSIONS = []
+    MODELS = []
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # noinspection PyPep8Naming
