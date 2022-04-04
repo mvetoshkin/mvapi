@@ -2,13 +2,13 @@ import importlib
 import os
 
 from mvapi.settings import settings
-from mvapi.web.views.base import BaseView
+from mvapi.web.serializers.base import BaseSerializer
 
-RESOURCE_VIEWS = {}
+RESOURCE_SERIALIZERS = {}
 
 
-def import_views():
-    views = [__package__] + settings.VIEWS
+def import_serializers():
+    views = [__package__] + settings.SERIALIZERS
 
     for view_str in views:
         view = importlib.import_module(view_str)
@@ -19,6 +19,6 @@ def import_views():
                 for attr_name in dir(mod):
                     attr = getattr(mod, attr_name)
                     if type(attr) == type and \
-                            issubclass(attr, BaseView) and \
-                            attr != BaseView:
-                        RESOURCE_VIEWS[attr.resource_type] = attr
+                            issubclass(attr, BaseSerializer) and \
+                            attr != BaseSerializer:
+                        RESOURCE_SERIALIZERS[attr.resource_type] = attr

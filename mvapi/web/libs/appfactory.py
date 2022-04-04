@@ -3,7 +3,7 @@ import json
 import logging
 
 import time
-from flask import Flask, g
+from flask import Flask, g, request
 from sqlalchemy import event
 from sqlalchemy.engine.base import Engine
 from werkzeug.exceptions import HTTPException
@@ -129,6 +129,9 @@ def create_app():
         if status == 500:
             logger.error(errors_text, exc_info=True)
 
+            if not settings.DEBUG:
+                save_error()
+
         data = {
             'errors': errors_text.split('; '),
             'status': str(status)
@@ -141,28 +144,33 @@ def create_app():
         }
 
     @app.errorhandler(Exception)
-    def error_handler(error):
-        if isinstance(error, (BadRequestError, AppValueError, ModelKeyError,)):
-            return app_error_response(error, 400, 'Bad request')
+    def error_handler(exc):
+        if request.blueprint == 'api':
+            if isinstance(exc, (BadRequestError, AppValueError,
+                                ModelKeyError,)):
+                return app_error_response(exc, 400, 'Bad request')
 
-        if isinstance(error, UnauthorizedError):
-            return app_error_response(error, 401, 'Unauthorized')
+            if isinstance(exc, UnauthorizedError):
+                return app_error_response(exc, 401, 'Unauthorized')
 
-        if isinstance(error, AccessDeniedError):
-            return app_error_response(error, 403, 'Access denied')
+            if isinstance(exc, AccessDeniedError):
+                return app_error_response(exc, 403, 'Access denied')
 
-        if isinstance(error, (NotFoundError, UnexpectedArgumentsError,)):
-            return app_error_response(error, 404, 'Not found')
+            if isinstance(exc, (NotFoundError, UnexpectedArgumentsError,)):
+                return app_error_response(exc, 404, 'Not found')
 
-        if isinstance(error, NotAllowedError):
-            return app_error_response(error, 405, 'Method not allowed')
+            if isinstance(exc, NotAllowedError):
+                return app_error_response(exc, 405, 'Method not allowed')
 
-        if isinstance(error, HTTPException):
-            return app_error_response(error, error.code, error.name)
+            if isinstance(exc, HTTPException):
+                return app_error_response(exc, exc.code, exc.name)
 
-        save_error()
+            return app_error_response(exc, 500, 'Unknown error')
 
-        return app_error_response(error, 500, 'Unknown error')
+        if exc.code == 500 and not settings.DEBUG:
+            save_error()
+
+        return app.handle_exception(exc)
 
     if settings.DEBUG_SQL:
         # noinspection PyUnusedLocal

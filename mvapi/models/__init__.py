@@ -5,14 +5,16 @@ from datetime import datetime
 from uuid import uuid4
 
 import shortuuid
-from sqlalchemy import Column, DateTime, String
+from sqlalchemy import Column, DateTime, inspect, String
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
-from sqlalchemy.orm import Query
+from sqlalchemy.orm import ColumnProperty, Query, RelationshipProperty
 
-from mvapi.settings import settings
+import mvapi.web.models
 from mvapi.libs.database import db
 from mvapi.libs.exceptions import NotFoundError
+from mvapi.libs.misc import classproperty
+from mvapi.settings import settings
 
 
 class BaseQuery(Query):
@@ -72,8 +74,50 @@ class BaseModel(declarative_base()):
         return name
 
     @property
+    def type_(self):
+        return self.__table__.name.lower()
+
+    @property
     def short_id(self):
         return shortuuid.encode(self.id_)
+
+    @classproperty
+    def available_columns(self):
+        return {key for key, value in inspect(self).mapper.attrs.items()
+                if isinstance(value, ColumnProperty)}
+
+    @classproperty
+    def available_relationships(self):
+        attrs = inspect(self).mapper.attrs
+        return {key: value.local_columns for key, value in attrs.items()
+                if isinstance(value, RelationshipProperty)}
+
+    @classproperty
+    def relationship_keys(self):
+        rels = self.available_relationships
+        keys = set(rels.keys())
+
+        for fields in rels.values():
+            keys |= {field.name for field in fields
+                     if field.name in self.available_columns}
+
+        return keys
+
+    @classproperty
+    def required_keys(self):
+        keys = set()
+
+        for key in self.available_columns:
+            attr = getattr(self, key)
+            if hasattr(attr, 'nullable') and not attr.nullable:
+                keys.add(key)
+
+        for key, value in self.available_relationships.items():
+            for column in value:
+                if column.name in keys:
+                    keys.add(key)
+
+        return keys
 
     @classmethod
     def create(cls, *args, **kwargs):
@@ -88,7 +132,9 @@ class BaseModel(declarative_base()):
 
 
 def import_models():
-    models = [__package__] + settings.MODELS
+    models = [__package__] + \
+             [mvapi.web.models.__package__] + \
+             settings.MODELS
 
     for model_str in models:
         model = importlib.import_module(model_str)

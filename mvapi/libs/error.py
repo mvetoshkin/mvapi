@@ -53,6 +53,9 @@ def get_traceback_frames(traceback):
 
 
 def get_file_lines(filename, lineno):
+    if not os.path.exists(filename):
+        return []
+
     with open(filename, 'rt') as file:
         lines = file.readlines()
 

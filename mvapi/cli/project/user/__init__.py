@@ -1,6 +1,7 @@
 import click
 
-from .set_user import set_user
+from .create_user import create_user
+from .update_user import update_user
 
 
 @click.group()
@@ -8,4 +9,5 @@ def user():
     pass
 
 
-user.add_command(set_user)
+user.add_command(create_user)
+user.add_command(update_user)

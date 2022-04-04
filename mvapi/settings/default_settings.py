@@ -10,8 +10,18 @@ class DefaultSettings:
     ENV = 'production'
     ERRORS_PATH = '.errors'
     EXTENSIONS = []
+    JWTAUTH_SETTINGS = {}
+    LIMIT = 15
+
+    MIGRATIONS_EXCLUDE_TABLES = (
+        'celery_taskmeta',
+        'celery_tasksetmeta',
+    )
+
     MODELS = []
+    SERIALIZERS = []
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    VIEWS = []
 
     # noinspection PyPep8Naming
     @property
