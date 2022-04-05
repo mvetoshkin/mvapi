@@ -202,8 +202,7 @@ class APIView(View):
                 )
 
                 model = attr.column_descriptions[0]['type']
-                rel_query = model.all(query=attr, as_query=True)
-                rel_queries[model].append(rel_query.subquery().select())
+                rel_queries[model].append(attr.subquery().select())
 
         for model, queries in rel_queries.items():
             query = (db.session.query(model, text('relationship_for'))

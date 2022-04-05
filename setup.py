@@ -24,6 +24,7 @@ setup(
         'click == 8.0.1',
         'flask == 2.0.2',
         'flask-cors == 3.0.10',
+        'inflect == 5.4.0',
         'jinja2 == 3.0.2',
         'psycopg2 == 2.9.3',
         'pyjwt == 2.3.0',

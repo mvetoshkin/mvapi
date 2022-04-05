@@ -1,9 +1,9 @@
 import bcrypt
 from sqlalchemy import Boolean, Column, DateTime, String
-from sqlalchemy.orm import validates
+from sqlalchemy.orm import validates, relationship
 from validate_email import validate_email
 
-from mvapi.models import BaseModel
+from mvapi.models import BaseModel, BaseQuery
 from mvapi.web.libs.exceptions import AppValueError
 
 
@@ -35,6 +35,9 @@ class User(BaseModel):
     name = Column(
         String(128)
     )
+
+    sessions = relationship('Session', lazy='dynamic', viewonly=True,
+                            query_class=BaseQuery)
 
     def __repr__(self):
         return f'<Email: {self.email}>'

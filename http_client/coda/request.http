@@ -1,0 +1,21 @@
+### Authentication
+
+POST {{ host }}/api/sessions
+Accept: application/json
+Content-Type: application/json
+
+{
+    "data": {
+        "attributes": {
+            "email": "{{ email }}",
+            "password": "{{ password }}"
+        }
+    }
+}
+
+### Sessions
+
+GET {{ host }}/api/sessions
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{ access_token }}

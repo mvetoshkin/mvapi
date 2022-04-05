@@ -61,5 +61,5 @@ class JSONWebToken:
         if not session_id:
             raise JWTError('Invalid payload')
 
-        session = Session.get(id_=session_id)
+        session = Session.query.get(session_id)
         return session.user
