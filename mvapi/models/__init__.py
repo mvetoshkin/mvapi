@@ -134,11 +134,71 @@ class BaseModel(declarative_base()):
         return keys
 
     @classmethod
-    def create(cls, *args, **kwargs):
-        obj = cls(*args, **kwargs)
+    def create(cls, **kwargs):
+        obj = cls()
+        obj.populate(**kwargs)
+
         db.session.add(obj)
         db.session.flush()
+
         return obj
+
+    def populate(self, **kwargs):
+        used_columns = set()
+
+        for key in self.required_keys & set(kwargs.keys()):
+            value = kwargs[key]
+
+            if type(value) is bool and value is False:
+                continue
+
+            if value is None or value == '':
+                raise ModelKeyError(f'Attribute {key} can\'t be null or empty')
+
+        relationships = self.available_relationships
+        for attr in kwargs:
+            cols = relationships.get(attr)
+            if not cols:
+                continue
+
+            used_columns.add(attr)
+            existing_value = getattr(self, attr)
+
+            value = self.get_param_value(kwargs[attr])
+            if value:
+                value = value.__class__.get(id_=value.id_)
+
+            if (isinstance(existing_value, BaseModel) and
+                    isinstance(value, BaseModel) and
+                    existing_value.id_ == value.id_):
+                continue
+
+            setattr(self, attr, value)
+
+            for col in cols:
+                setattr(self, col.key, value.id_ if value else None)
+
+        columns = self.available_columns
+        for attr in kwargs.keys():
+            if attr == 'id':
+                attr = 'id_'
+
+            if attr in columns:
+                used_columns.add(attr)
+                value = self.get_param_value(kwargs[attr])
+                setattr(self, attr, value)
+
+        remaining_attrs = list(set(kwargs.keys()) - used_columns)
+        if remaining_attrs:
+            if len(remaining_attrs) == 1:
+                raise ModelKeyError(
+                    f'Attribute {remaining_attrs[0]} doesn\'t exist'
+                )
+            else:
+                attrs = ', '.join(remaining_attrs)
+                raise ModelKeyError(f'Attributes {attrs} don\'t exist')
+
+        return self
 
     def delete(self):
         db.session.delete(self)
