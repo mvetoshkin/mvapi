@@ -1,23 +1,3 @@
-import mimetypes
-
-
-class FileResponse:
-    data = None
-    name = None
-    content_type = None
-    stream = None
-
-    def __init__(self, data, name, content_type=None, stream=False):
-        self.data = data
-        self.name = name
-        self.content_type = content_type
-        self.stream = stream
-
-        if not self.content_type:
-            ext = '.' + self.name.split('.')[-1]
-            self.content_type = mimetypes.types_map.get(ext)
-
-
 class ApiResponse:
     __next_page = None
 

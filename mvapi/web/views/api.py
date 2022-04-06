@@ -1,17 +1,16 @@
 import json
 from collections import defaultdict, OrderedDict
 
-from flask import make_response, request, Response, stream_with_context
+from flask import request
 from flask.views import View
 from sqlalchemy import literal_column, text, union_all
 from sqlalchemy.orm import Query
 
 from mvapi.libs.database import db
 from mvapi.libs.exceptions import NotFoundError
-from mvapi.web.libs.exceptions import BadRequestError, JWTError
 from mvapi.web.libs.jsonwebtoken import get_current_user
 from mvapi.web.libs.misc import dict_value, is_local_dev_host, JSONEncoder
-from mvapi.web.libs.types import ApiResponse, FileResponse
+from mvapi.web.libs.types import ApiResponse
 from mvapi.web.serializers.items import ItemsSerializer
 from mvapi.web.views import RESOURCE_VIEWS
 
@@ -41,37 +40,12 @@ class APIView(View):
             if req_method == 'post':
                 resp.status = 201
 
-        if type(resp.data) is FileResponse:
-            results = self.__render_file(resp.data)
-
-        elif type(resp.data) == str or isinstance(resp.data, Response):
-            results = resp.data
-
-        else:
-            is_delete = req_method == 'delete'
-            results = self.__render(resp, is_delete=is_delete)
+        is_delete = req_method == 'delete'
+        results = self.__render(resp, is_delete=is_delete)
 
         db.session.commit()
 
         return results
-
-
-
-
-
-    @staticmethod
-    def __render_file(file: FileResponse):
-        if file.stream:
-            ctx = file.data.iter_content(chunk_size=512)
-            resp = Response(stream_with_context(ctx))
-        else:
-            resp = make_response(file.data)
-
-        resp.headers['Content-Type'] = file.content_type
-        resp.headers['Content-Disposition'] = \
-            'attachment; filename=' + file.name
-
-        return resp
 
     def __render(self, response: ApiResponse, is_delete=False):
         results = OrderedDict([
