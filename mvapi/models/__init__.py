@@ -259,6 +259,12 @@ class BaseModel(declarative_base()):
 
         return order_fields
 
+    @staticmethod
+    def get_param_value(param):
+        if type(param) == str and len(param) == 0:
+            return None
+        return param
+
 
 def import_models():
     models = [__package__] + \
