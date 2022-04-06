@@ -1,9 +1,11 @@
 from datetime import datetime, timedelta
 
 import jwt
+from flask import request
 
+from mvapi.libs.exceptions import NotFoundError
 from mvapi.settings import settings
-from mvapi.web.libs.exceptions import JWTError
+from mvapi.web.libs.exceptions import BadRequestError, JWTError
 from mvapi.web.libs.misc import JSONEncoder
 from mvapi.web.models.session import Session
 
@@ -63,3 +65,23 @@ class JSONWebToken:
 
         session = Session.query.get(session_id)
         return session.user
+
+
+def get_current_user():
+    header = request.headers.get('Authorization')
+    if not header:
+        return None
+
+    try:
+        token_type, access_token = header.split(' ')
+    except ValueError:
+        raise BadRequestError('Wrong authorization header')
+
+    if token_type.lower() != 'bearer':
+        raise BadRequestError('Wrong authorization token type')
+
+    try:
+        jwt = JSONWebToken()
+        return jwt.get_user(access_token)
+    except (NotFoundError, JWTError):
+        return None

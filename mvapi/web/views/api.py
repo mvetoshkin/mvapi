@@ -9,7 +9,7 @@ from sqlalchemy.orm import Query
 from mvapi.libs.database import db
 from mvapi.libs.exceptions import NotFoundError
 from mvapi.web.libs.exceptions import BadRequestError, JWTError
-from mvapi.web.libs.jsonwebtoken import JSONWebToken
+from mvapi.web.libs.jsonwebtoken import get_current_user
 from mvapi.web.libs.misc import dict_value, is_local_dev_host, JSONEncoder
 from mvapi.web.libs.types import ApiResponse, FileResponse
 from mvapi.web.serializers.items import ItemsSerializer
@@ -23,7 +23,7 @@ class APIView(View):
     __headers = None
 
     def dispatch_request(self, **kwargs):
-        self.__get_current_user()
+        self.__current_user = get_current_user()
 
         req_method = request.method.lower()
         resource_type = kwargs.get('resource_type')
@@ -55,24 +55,9 @@ class APIView(View):
 
         return results
 
-    def __get_current_user(self):
-        header = request.headers.get('Authorization')
-        if not header:
-            return None
 
-        try:
-            token_type, access_token = header.split(' ')
-        except ValueError:
-            raise BadRequestError('Wrong authorization header')
 
-        if token_type.lower() != 'bearer':
-            raise BadRequestError('Wrong authorization token type')
 
-        try:
-            jwt = JSONWebToken()
-            self.__current_user = jwt.get_user(access_token)
-        except (NotFoundError, JWTError):
-            return None
 
     @staticmethod
     def __render_file(file: FileResponse):
