@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 def update_user(email, password, is_admin):
     """Update a user."""
 
-    user = User.get_by_email(email=email)
+    user = User.query.get_by(email=email)
 
     if password:
         user.password = password

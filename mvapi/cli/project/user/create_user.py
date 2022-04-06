@@ -14,5 +14,10 @@ logger = logging.getLogger(__name__)
 def create_user(email, password, is_admin):
     """Create a user."""
 
+    user = User.query.get_by(email=email)
+    if user:
+        logger.info(f'User {user} exists')
+        return
+
     user = User.create(email=email, password=password, is_admin=is_admin)
     logger.info(f'User {user} created')
