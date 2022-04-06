@@ -7,7 +7,7 @@ from mvapi.libs.misc import render_template
 from mvapi.settings import settings
 
 
-def save_error():
+def save_error(save_to_file=True):
     timestamp = datetime.utcnow()
     exc_type, exc_value, exc_traceback = sys.exc_info()
     python_executable = sys.executable
@@ -17,17 +17,19 @@ def save_error():
     frames = get_traceback_frames(exc_traceback)
     last_frame = frames[-1]
 
-    errors_dir = settings.ERRORS_PATH
-    error_loc = last_frame['filename'].rpartition('/')[-1]
-    error_ts = timestamp.strftime('%Y%m%d.%H%M%S')
-    error_filename = os.path.join(errors_dir, f'{error_loc}.{error_ts}.html')
+    error_str = render_template('error', locals())
 
-    if not os.path.exists(errors_dir):
-        os.makedirs(errors_dir, exist_ok=True)
+    if save_to_file:
+        errors_dir = settings.ERRORS_PATH
+        error_loc = last_frame['filename'].rpartition('/')[-1]
+        error_ts = timestamp.strftime('%Y%m%d.%H%M%S')
+        filename = os.path.join(errors_dir, f'{error_loc}.{error_ts}.html')
 
-    with open(error_filename, 'wt') as error_file:
-        error_str = render_template('error', locals())
-        error_file.write(error_str)
+        if not os.path.exists(errors_dir):
+            os.makedirs(errors_dir, exist_ok=True)
+
+        with open(filename, 'wt') as error_file:
+            error_file.write(error_str)
 
     return error_str
 

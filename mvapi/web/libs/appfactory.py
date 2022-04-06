@@ -116,14 +116,14 @@ def create_app():
 
         db.session.remove()
 
-    def app_error_response(error, status, default_text):
+    def app_error_response(exc, status, default_text):
         db.session.rollback()
 
-        errors_text = '; '.join(error.args) if error.args else default_text
+        errors_text = '; '.join(exc.args) if exc.args else default_text
 
         if not settings.DEBUG and not (
-                isinstance(error, AppException) and
-                not isinstance(error, UnexpectedArgumentsError)):
+                isinstance(exc, AppException) and
+                not isinstance(exc, UnexpectedArgumentsError)):
             errors_text = default_text
 
         if status == 500:
@@ -132,45 +132,40 @@ def create_app():
             if not settings.DEBUG:
                 save_error()
 
-        data = {
-            'errors': errors_text.split('; '),
-            'status': str(status)
-        }
+        if request.blueprint == 'api':
+            data = {
+                'errors': errors_text.split('; '),
+                'status': str(status)
+            }
 
-        # TODO: Change it to use the common response class
-
-        return json.dumps(data), status, {
-            'Content-Type': 'application/json; charset=utf-8'
-        }
+            return json.dumps(data), status, {
+                'Content-Type': 'application/json; charset=utf-8'
+            }
+        else:
+            return save_error(False), status
 
     @app.errorhandler(Exception)
     def error_handler(exc):
-        if request.blueprint == 'api':
-            if isinstance(exc, (BadRequestError, AppValueError,
-                                ModelKeyError,)):
-                return app_error_response(exc, 400, 'Bad request')
+        if isinstance(exc, (BadRequestError, AppValueError,
+                            ModelKeyError,)):
+            return app_error_response(exc, 400, 'Bad request')
 
-            if isinstance(exc, UnauthorizedError):
-                return app_error_response(exc, 401, 'Unauthorized')
+        if isinstance(exc, UnauthorizedError):
+            return app_error_response(exc, 401, 'Unauthorized')
 
-            if isinstance(exc, AccessDeniedError):
-                return app_error_response(exc, 403, 'Access denied')
+        if isinstance(exc, AccessDeniedError):
+            return app_error_response(exc, 403, 'Access denied')
 
-            if isinstance(exc, (NotFoundError, UnexpectedArgumentsError,)):
-                return app_error_response(exc, 404, 'Not found')
+        if isinstance(exc, (NotFoundError, UnexpectedArgumentsError,)):
+            return app_error_response(exc, 404, 'Not found')
 
-            if isinstance(exc, NotAllowedError):
-                return app_error_response(exc, 405, 'Method not allowed')
+        if isinstance(exc, NotAllowedError):
+            return app_error_response(exc, 405, 'Method not allowed')
 
-            if isinstance(exc, HTTPException):
-                return app_error_response(exc, exc.code, exc.name)
+        if isinstance(exc, HTTPException):
+            return app_error_response(exc, exc.code, exc.name)
 
-            return app_error_response(exc, 500, 'Unknown error')
-
-        if exc.code == 500 and not settings.DEBUG:
-            save_error()
-
-        return app.handle_exception(exc)
+        return app_error_response(exc, 500, 'Unknown error')
 
     if settings.DEBUG_SQL:
         # noinspection PyUnusedLocal
