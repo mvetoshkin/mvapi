@@ -329,7 +329,7 @@ class BaseView:
         if self.resource_model and self.resource_id:
             return self.resource_model.query.get(self.resource_id)
 
-        return None
+        raise NotFoundError
 
     def get_resources(self, allow_all=False):
         if allow_all or (self.current_user and self.current_user.is_admin):
