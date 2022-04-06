@@ -1,7 +1,7 @@
 import re
 from copy import deepcopy
 
-from flask import request
+from flask import g, request
 from sqlalchemy.orm import Query
 from werkzeug.exceptions import BadRequest
 
@@ -31,8 +31,8 @@ class BaseView:
     common_args = None
     return_fields = None
 
-    def __init__(self, current_user, **kwargs):
-        self.current_user = current_user
+    def __init__(self, **kwargs):
+        self.current_user = g.current_user
 
         self.resource_id = kwargs.get('resource_id')
         self.relationship_type = kwargs.get('relationship_type')

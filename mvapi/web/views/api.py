@@ -1,14 +1,13 @@
 import json
 from collections import defaultdict, OrderedDict
 
-from flask import request
+from flask import g, request
 from flask.views import View
 from sqlalchemy import literal_column, text, union_all
 from sqlalchemy.orm import Query
 
 from mvapi.libs.database import db
 from mvapi.libs.exceptions import NotFoundError
-from mvapi.web.libs.jsonwebtoken import get_current_user
 from mvapi.web.libs.misc import dict_value, is_local_dev_host, JSONEncoder
 from mvapi.web.libs.types import ApiResponse
 from mvapi.web.serializers.items import ItemsSerializer
@@ -22,7 +21,7 @@ class APIView(View):
     __headers = None
 
     def dispatch_request(self, **kwargs):
-        self.__current_user = get_current_user()
+        self.__current_user = g.current_user
 
         req_method = request.method.lower()
         resource_type = kwargs.get('resource_type')

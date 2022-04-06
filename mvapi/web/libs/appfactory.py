@@ -17,6 +17,7 @@ from mvapi.web.libs.exceptions import AccessDeniedError, AppException, \
     AppValueError, BadRequestError, NoConverterException, \
     NoExtensionException, NotAllowedError, UnauthorizedError, \
     UnexpectedArgumentsError
+from mvapi.web.libs.jsonwebtoken import JSONWebToken, JWTError
 
 logger = logging.getLogger(__name__)
 
@@ -166,6 +167,28 @@ def create_app():
             return app_error_response(exc, exc.code, exc.name)
 
         return app_error_response(exc, 500, 'Unknown error')
+
+    @app.before_request
+    def get_current_user():
+        g.current_user = None
+
+        header = request.headers.get('Authorization')
+        if not header:
+            return None
+
+        try:
+            token_type, access_token = header.split(' ')
+        except ValueError:
+            raise BadRequestError('Wrong authorization header')
+
+        if token_type.lower() != 'bearer':
+            raise BadRequestError('Wrong authorization token type')
+
+        try:
+            jwt = JSONWebToken()
+            g.current_user = jwt.get_user(access_token)
+        except (NotFoundError, JWTError):
+            return None
 
     if settings.DEBUG_SQL:
         # noinspection PyUnusedLocal
