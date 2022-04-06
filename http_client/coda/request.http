@@ -19,3 +19,11 @@ GET {{ host }}/api/sessions
 Accept: application/json
 Content-Type: application/json
 Authorization: Bearer {{ access_token }}
+
+
+### Users
+
+GET {{ host }}/api/users
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{ access_token }}
