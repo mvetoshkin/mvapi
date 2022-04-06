@@ -19,8 +19,7 @@ class SessionsView(BaseView):
                 else self.current_user.sessions.apply_args(**self.common_args))
 
     def post(self):
-        data = self.available_data(required={'email'},
-                                   extra={'email', 'password'})
+        data = self.available_data(required={'email'}, extra={'password'})
         password = data.get('password')
 
         if not password and not (self.current_user and

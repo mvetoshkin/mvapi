@@ -12,12 +12,7 @@ class DefaultSettings:
     EXTENSIONS = []
     JWTAUTH_SETTINGS = {}
     LIMIT = 15
-
-    MIGRATIONS_EXCLUDE_TABLES = (
-        'celery_taskmeta',
-        'celery_tasksetmeta',
-    )
-
+    MIGRATIONS_EXCLUDE_TABLES = tuple()
     MODELS = []
     SERIALIZERS = []
     SQLALCHEMY_TRACK_MODIFICATIONS = False

@@ -8,33 +8,11 @@ from mvapi.web.libs.exceptions import AppValueError
 
 
 class User(BaseModel):
-    email = Column(
-        String(128),
-        nullable=False,
-        unique=True,
-        index=True
-    )
-
-    password = Column(
-        String(128),
-        nullable=False
-    )
-
-    deleted = Column(
-        DateTime,
-        index=True,
-        default=None
-    )
-
-    is_admin = Column(
-        Boolean,
-        nullable=False,
-        default=False
-    )
-
-    name = Column(
-        String(128)
-    )
+    email = Column(String(128), nullable=False, unique=True, index=True)
+    password = Column(String(128), nullable=False)
+    deleted = Column(DateTime, index=True, default=None)
+    is_admin = Column(Boolean, nullable=False, default=False)
+    name = Column(String(128))
 
     sessions = relationship('Session', lazy='dynamic', viewonly=True,
                             query_class=BaseQuery)

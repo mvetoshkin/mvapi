@@ -60,25 +60,13 @@ class BaseModel(declarative_base()):
     default_sort = None
     query = db.session.query_property(query_cls=BaseQuery)
 
-    id_: Column = Column(
-        'id',
-        String(36),
-        primary_key=True,
-        default=lambda: str(uuid4())
-    )
-
-    created_date: Column = Column(
-        DateTime,
-        nullable=False,
-        default=datetime.utcnow
-    )
-
-    modified_date: Column = Column(
-        DateTime,
-        nullable=False,
-        default=datetime.utcnow,
-        onupdate=datetime.utcnow
-    )
+    id_: Column = Column('id', String(36), primary_key=True,
+                         default=lambda: str(uuid4()))
+    created_date: Column = Column(DateTime, nullable=False,
+                                  default=datetime.utcnow)
+    modified_date: Column = Column(DateTime, nullable=False,
+                                   default=datetime.utcnow,
+                                   onupdate=datetime.utcnow)
 
     def __repr__(self):
         return f'<{self.__class__.__name__} {self.id_}>'
