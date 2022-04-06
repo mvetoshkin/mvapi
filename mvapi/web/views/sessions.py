@@ -1,7 +1,7 @@
 from flask import request
 
 from mvapi.libs.exceptions import NotFoundError
-from mvapi.web.libs.decorators import admin_required
+from mvapi.web.libs.decorators import auth_required
 from mvapi.web.libs.exceptions import BadRequestError, UnauthorizedError
 from mvapi.web.models.session import Session
 from mvapi.web.models.user import User
@@ -12,7 +12,7 @@ class SessionsView(BaseView):
     resource_type = 'sessions'
     resource_model = Session
 
-    @admin_required
+    @auth_required
     def get(self):
         return (self.current_user.sessions.get(self.resource_id)
                 if self.resource_id
