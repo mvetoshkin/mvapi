@@ -10,7 +10,7 @@ from .utils import DIRECTORY, get_config
 @click.option('--template', default='generic',
               help='name of the migration environment template to use')
 def init_(directory, template):
-    """Initialize a new scripts directory."""
+    """Initialize a new scripts directory"""
 
     config = get_config(directory)
     init(config, directory, template=template)

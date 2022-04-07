@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 @click.option('--is-admin', is_flag=True, help='make user an admin')
 @click.password_option(help='user password', required=True)
 def create_user(email, password, is_admin):
-    """Create a user."""
+    """Create a user"""
 
     user = User.query.get_by(email=email)
     if user:

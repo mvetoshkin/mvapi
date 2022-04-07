@@ -13,7 +13,7 @@ version = import_object(f'{settings.APP_NAME}.version.version')
 @click.group()
 @click.version_option(version)
 @click.option('--verbosity', is_flag=True, default=settings.DEBUG,
-              help='show debug log')
+              help='Show debug log')
 def cli(verbosity):
     init_logger(verbosity)
 

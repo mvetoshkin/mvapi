@@ -6,6 +6,7 @@ from .update_user import update_user
 
 @click.group()
 def user():
+    """Manage users"""
     pass
 
 

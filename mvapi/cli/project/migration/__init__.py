@@ -8,6 +8,8 @@ from .upgrade import upgrade_
 
 @click.group()
 def migration():
+    """Database migrations"""
+
     pass
 
 

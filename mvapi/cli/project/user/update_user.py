@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 @click.option('--is-admin', is_flag=True, help='make user an admin')
 @click.password_option(help='user password')
 def update_user(email, password, is_admin):
-    """Update a user."""
+    """Update a user"""
 
     user = User.query.get_by(email=email)
 

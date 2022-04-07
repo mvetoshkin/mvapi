@@ -15,7 +15,7 @@ from .utils import DIRECTORY, get_config
 @click.option('--tag', help='an arbitrary tag that can be intercepted by '
                             'custom `env.py` scripts')
 def downgrade_(directory, revision, sql, tag):
-    """Revert to a previous version."""
+    """Revert to a previous version"""
 
     if sql and revision == '-1':
         revision = 'head:-1'

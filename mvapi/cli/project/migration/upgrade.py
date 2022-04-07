@@ -15,7 +15,7 @@ from .utils import DIRECTORY, get_config
 @click.option('--tag', help='an arbitrary tag that can be intercepted by '
                             'custom `env.py` scripts')
 def upgrade_(directory, revision, sql, tag):
-    """Upgrade to a later version."""
+    """Upgrade to a later version"""
 
     config = get_config(directory)
     upgrade(config, revision, sql=sql, tag=tag)

@@ -5,6 +5,8 @@ from .run import run_
 
 @click.group()
 def web():
+    """Web server commands"""
+
     pass
 
 

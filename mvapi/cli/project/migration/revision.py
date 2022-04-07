@@ -26,7 +26,7 @@ from .utils import DIRECTORY, get_config
                                'one generated')
 def revision_(directory, message, autogenerate, sql, head, splice, branch_label,
               version_path, rev_id):
-    """Create a new revision file."""
+    """Create a new revision file"""
 
     config = get_config(directory)
     revision(config, message=message, autogenerate=autogenerate, sql=sql,
