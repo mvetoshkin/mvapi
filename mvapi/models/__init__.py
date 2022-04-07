@@ -13,7 +13,7 @@ from sqlalchemy.orm import ColumnProperty, Query, RelationshipProperty
 
 import mvapi.web.models
 from mvapi.libs.database import db
-from mvapi.libs.exceptions import NotFoundError, ModelKeyError
+from mvapi.libs.exceptions import ModelKeyError, NotFoundError
 from mvapi.libs.misc import classproperty
 from mvapi.settings import settings
 
@@ -67,9 +67,6 @@ class BaseModel(declarative_base()):
     modified_date: Column = Column(DateTime, nullable=False,
                                    default=datetime.utcnow,
                                    onupdate=datetime.utcnow)
-
-    def __repr__(self):
-        return f'<{self.__class__.__name__} {self.id_}>'
 
     @declared_attr
     def __tablename__(self):
@@ -133,72 +130,41 @@ class BaseModel(declarative_base()):
 
         return keys
 
+    def __init__(self, **kwargs):
+        invalid_attrs = []
+
+        for k in kwargs:
+            if not hasattr(self.__class__, k):
+                invalid_attrs.append(k)
+
+        if invalid_attrs:
+            if len(invalid_attrs) == 1:
+                raise ModelKeyError(
+                    f'Attribute {invalid_attrs[0]} doesn\'t exist'
+                )
+            else:
+                attrs = ', '.join(invalid_attrs)
+                raise ModelKeyError(f'Attributes {attrs} don\'t exist')
+
+        super(BaseModel, self).__init__(**kwargs)
+
+    def __setattr__(self, key, value):
+        if key in self.required_keys and (value is None or value == ''):
+            raise ModelKeyError(f'Attribute {key} can\'t be null or empty')
+
+        super(BaseModel, self).__setattr__(key, value)
+
+    def __repr__(self):
+        return f'<{self.__class__.__name__} {self.id_}>'
+
     @classmethod
     def create(cls, **kwargs):
-        obj = cls()
-        obj.populate(**kwargs)
+        obj = cls(**kwargs)
 
         db.session.add(obj)
         db.session.flush()
 
         return obj
-
-    def populate(self, **kwargs):
-        used_columns = set()
-
-        for key in self.required_keys & set(kwargs.keys()):
-            value = kwargs[key]
-
-            if type(value) is bool and value is False:
-                continue
-
-            if value is None or value == '':
-                raise ModelKeyError(f'Attribute {key} can\'t be null or empty')
-
-        relationships = self.available_relationships
-        for attr in kwargs:
-            cols = relationships.get(attr)
-            if not cols:
-                continue
-
-            used_columns.add(attr)
-            existing_value = getattr(self, attr)
-
-            value = self.get_param_value(kwargs[attr])
-            if value:
-                value = value.__class__.get(id_=value.id_)
-
-            if (isinstance(existing_value, BaseModel) and
-                    isinstance(value, BaseModel) and
-                    existing_value.id_ == value.id_):
-                continue
-
-            setattr(self, attr, value)
-
-            for col in cols:
-                setattr(self, col.key, value.id_ if value else None)
-
-        columns = self.available_columns
-        for attr in kwargs.keys():
-            if attr == 'id':
-                attr = 'id_'
-
-            if attr in columns:
-                used_columns.add(attr)
-                value = self.get_param_value(kwargs[attr])
-                setattr(self, attr, value)
-
-        remaining_attrs = list(set(kwargs.keys()) - used_columns)
-        if remaining_attrs:
-            if len(remaining_attrs) == 1:
-                raise ModelKeyError(
-                    f'Attribute {remaining_attrs[0]} doesn\'t exist'
-                )
-            else:
-                attrs = ', '.join(remaining_attrs)
-                raise ModelKeyError(f'Attributes {attrs} don\'t exist')
-
-        return self
 
     def delete(self):
         db.session.delete(self)
@@ -258,12 +224,6 @@ class BaseModel(declarative_base()):
                 order_fields.append(column)
 
         return order_fields
-
-    @staticmethod
-    def get_param_value(param):
-        if type(param) == str and len(param) == 0:
-            return None
-        return param
 
 
 def import_models():
