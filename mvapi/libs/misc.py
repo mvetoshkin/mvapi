@@ -1,9 +1,6 @@
 import importlib
-import os
 
-from jinja2 import Template
-
-import mvapi
+from jinja2 import Environment, PackageLoader, PrefixLoader
 
 
 def import_object(path):
@@ -16,17 +13,15 @@ def import_object(path):
 
 
 def render_template(template_name, data):
-    filename = os.path.join(
-        os.path.dirname(mvapi.__file__),
-        'templates',
-        f'{template_name}.tmpl'
-    )
+    from mvapi.settings import settings
 
-    with open(filename, 'rt') as tmpl_file:
-        tmpl = Template(tmpl_file.read())
-        result = tmpl.render(data)
+    prefixes = {'mvapi': PackageLoader('mvapi', 'templates')}
+    for k, v in settings.TEMPLATE_LOADERS.items():
+        prefixes[k] = PackageLoader(*v)
 
-    return result
+    env = Environment(loader=PrefixLoader(prefixes))
+    tmpl = env.get_template(template_name)
+    return tmpl.render(data)
 
 
 # noinspection PyPep8Naming

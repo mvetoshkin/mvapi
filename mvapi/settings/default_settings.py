@@ -16,6 +16,7 @@ class DefaultSettings:
     MODELS = []
     SERIALIZERS = []
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    TEMPLATE_LOADERS = {}
     VIEWS = []
 
     # noinspection PyPep8Naming

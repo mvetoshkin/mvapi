@@ -17,7 +17,7 @@ def save_error(save_to_file=True):
     frames = get_traceback_frames(exc_traceback)
     last_frame = frames[-1]
 
-    error_str = render_template('error', locals())
+    error_str = render_template('mvapi/error.tmpl', locals())
 
     if save_to_file:
         errors_dir = settings.ERRORS_PATH
