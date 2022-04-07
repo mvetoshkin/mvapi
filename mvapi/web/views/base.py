@@ -9,7 +9,7 @@ from mvapi.libs.exceptions import NotFoundError
 from mvapi.settings import settings
 from mvapi.web.libs.exceptions import AccessDeniedError, BadRequestError, \
     UnauthorizedError
-from mvapi.web.libs.types import ApiResponse
+from mvapi.web.libs.misc import ApiResponse
 from mvapi.web.models.user import User
 
 
