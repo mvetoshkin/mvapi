@@ -32,6 +32,7 @@ setup(
         'shortuuid == 1.0.8',
         'sqlalchemy == 1.4.28',
         'validate-email == 1.3',
+        'werkzeug == 2.1.0',
     ],
     python_requires='>=3.9',
 )
