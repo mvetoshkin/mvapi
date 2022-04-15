@@ -57,13 +57,12 @@ class APIView(View):
         if is_delete:
             return self.__make_response(results=results, response=response)
 
-        if response.data:
-            relationships = self.__get_relationships(items=response.data)
-            serializer = ItemsSerializer(response, relationships=relationships,
-                                         current_user=self.__current_user)
+        relationships = self.__get_relationships(items=response.data)
+        serializer = ItemsSerializer(response, relationships=relationships,
+                                     current_user=self.__current_user)
 
-            for key, value in serializer.render().items():
-                results[key] = value
+        for key, value in serializer.render().items():
+            results[key] = value
 
         return self.__make_response(results=results, response=response)
 
