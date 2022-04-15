@@ -30,8 +30,8 @@ config.set_main_option('sqlalchemy.url', settings.SQLALCHEMY_DATABASE_URI)
 
 
 # noinspection PyUnusedLocal
-def include_symbol(tablename, schema=None):
-    return tablename not in settings.MIGRATIONS_EXCLUDE_TABLES
+def include_name(name, type_, parent_names):
+    return name not in settings.MIGRATIONS_EXCLUDE_TABLES
 
 
 def run_migrations_offline():
@@ -53,7 +53,7 @@ def run_migrations_offline():
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
         compare_type=True,
-        include_symbol=include_symbol
+        include_name=include_name
     )
 
     with context.begin_transaction():
@@ -78,7 +78,7 @@ def run_migrations_online():
             connection=connection,
             target_metadata=target_metadata,
             compare_type=True,
-            include_symbol=include_symbol
+            include_name=include_name
         )
 
         with context.begin_transaction():
