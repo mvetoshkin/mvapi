@@ -31,8 +31,7 @@ config.set_main_option('sqlalchemy.url', settings.SQLALCHEMY_DATABASE_URI)
 
 # noinspection PyUnusedLocal
 def include_symbol(tablename, schema=None):
-    exclude_tables = settings.get('MIGRATIONS_EXCLUDE_TABLES', tuple())
-    return tablename not in exclude_tables
+    return tablename not in settings.MIGRATIONS_EXCLUDE_TABLES
 
 
 def run_migrations_offline():
