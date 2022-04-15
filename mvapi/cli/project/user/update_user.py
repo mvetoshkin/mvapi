@@ -2,6 +2,7 @@ import logging
 
 import click
 
+from mvapi.libs.exceptions import NotFoundError
 from mvapi.web.models.user import User
 
 logger = logging.getLogger(__name__)
@@ -14,7 +15,11 @@ logger = logging.getLogger(__name__)
 def update_user(email, password, is_admin):
     """Update a user"""
 
-    user = User.query.get_by(email=email)
+    try:
+        user = User.query.get_by(email=email)
+    except NotFoundError:
+        logger.info(f'User with email {email} not found')
+        return
 
     if password:
         user.password = password

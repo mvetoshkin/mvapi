@@ -2,6 +2,7 @@ import logging
 
 import click
 
+from mvapi.libs.exceptions import NotFoundError
 from mvapi.web.models.user import User
 
 logger = logging.getLogger(__name__)
@@ -14,10 +15,12 @@ logger = logging.getLogger(__name__)
 def create_user(email, password, is_admin):
     """Create a user"""
 
-    user = User.query.get_by(email=email)
-    if user:
+    try:
+        user = User.query.get_by(email=email)
         logger.info(f'User {user} exists')
         return
+    except NotFoundError:
+        pass
 
     user = User.create(email=email, password=password, is_admin=is_admin)
     logger.info(f'User {user} created')
