@@ -1,5 +1,7 @@
 import importlib
 
+import click
+from dateutil.parser import parse
 from jinja2 import Environment, PackageLoader, PrefixLoader
 
 
@@ -31,3 +33,14 @@ class classproperty(object):
 
     def __get__(self, owner_self, owner_cls):
         return self.fget(owner_cls)
+
+
+# noinspection PyUnusedLocal
+def validate_date_arg(ctx, param, value):
+    if not value:
+        return None
+
+    try:
+        return parse(value)
+    except ValueError:
+        raise click.BadParameter('value cannot be parsed')

@@ -28,6 +28,7 @@ setup(
         'jinja2 == 3.0.2',
         'psycopg2 == 2.9.3',
         'pyjwt == 2.3.0',
+        'python-dateutil==2.8.2',
         'python-dotenv == 0.19.1',
         'shortuuid == 1.0.8',
         'sqlalchemy == 1.4.28',
