@@ -46,7 +46,8 @@ class ItemsSerializer:
 
     def __serialize_item(self, item, relationships=None):
         serializer = RESOURCE_SERIALIZERS.get(item.type_)
-        assert serializer is not None
+        if not serializer:
+            return None
 
         ser_obj = serializer(
             relationships=relationships,
@@ -96,6 +97,8 @@ class ItemsSerializer:
                     attr.id_ in data_ids):
                 continue
 
-            included[attr.id_] = self.__serialize_item(item=attr)
+            serialized_item = self.__serialize_item(item=attr)
+            if serialized_item:
+                included[attr.id_] = serialized_item
             self.__include_items(item=attr, included=included,
                                  data_ids=data_ids)
