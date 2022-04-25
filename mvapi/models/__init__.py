@@ -146,6 +146,12 @@ class BaseModel(declarative_base()):
                 attrs = ', '.join(invalid_attrs)
                 raise ModelKeyError(f'Attributes {attrs} don\'t exist')
 
+        missing_keys = self.required_keys - set(kwargs.keys()) - \
+                       {'id_', 'created_date', 'modified_date'}
+        if missing_keys:
+            keys = ', '.join(missing_keys)
+            raise ModelKeyError(f'Attributes {keys} can\'t be null or empty')
+
         super(BaseModel, self).__init__(**kwargs)
 
     def __setattr__(self, key, value):
