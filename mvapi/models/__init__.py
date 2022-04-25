@@ -127,6 +127,7 @@ class BaseModel(declarative_base()):
             for column in value:
                 if column.name in keys:
                     keys.add(key)
+                    keys.remove(column.name)
 
         return keys
 
