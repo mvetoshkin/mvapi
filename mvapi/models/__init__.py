@@ -54,8 +54,7 @@ class BaseQuery(Query):
 class BaseModel(declarative_base()):
     __abstract__ = True
 
-    __plural = None
-
+    plural = None
     name_prefix = None
     default_sort = None
     query = db.session.query_property(query_cls=BaseQuery)
@@ -81,12 +80,12 @@ class BaseModel(declarative_base()):
 
     @property
     def plural_type(self):
-        if not self.__plural:
+        if not self.plural:
             text = ' '.join(self.type_.split('_'))
             plural = inflect.engine().plural(text)
-            self.__plural = '_'.join(plural.split(' ')).lower()
+            self.plural = '_'.join(plural.split(' ')).lower()
 
-        return self.__plural.lower() if self.__plural else self.type_
+        return self.plural.lower() if self.plural else self.type_
 
     @property
     def short_id(self):
