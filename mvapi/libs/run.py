@@ -11,12 +11,12 @@ from mvapi.web.serializers import import_serializers
 from mvapi.web.views import import_views
 
 
-def run_app(wsgi=False, cli_=cli):
+def run_app(cli_=cli):
     import_models()
     import_views()
     import_serializers()
 
-    if wsgi:
+    if not cli_:
         init_logger(settings.DEBUG)
         return create_app()
     else:
