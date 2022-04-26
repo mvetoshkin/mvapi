@@ -276,7 +276,7 @@ class BaseView:
             errors = []
             for key in required:
                 val = data.get(key)
-                if not val:
+                if not val and key in self.resource_model.available_columns:
                     column_name = self.resource_model.readable_column_name(key)
                     errors.append(f'{column_name} is required')
 
