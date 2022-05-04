@@ -143,7 +143,10 @@ def create_app():
                 'Content-Type': 'application/json; charset=utf-8'
             }
         else:
-            return save_error(False), status
+            data = save_error(False) if settings.DEBUG \
+                else errors_text
+
+            return data, status
 
     @app.errorhandler(Exception)
     def error_handler(exc):
