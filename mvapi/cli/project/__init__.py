@@ -1,6 +1,5 @@
 import click
 
-from mvapi.libs.logger import init_logger
 from mvapi.libs.misc import import_object
 from mvapi.settings import settings
 from .migration import migration
@@ -13,10 +12,8 @@ version = import_object(f'{settings.APP_NAME}.version.version')
 
 @click.group()
 @click.version_option(version)
-@click.option('--verbosity', is_flag=True, default=settings.DEBUG,
-              help='Show debug log')
-def cli(verbosity):
-    init_logger(verbosity)
+def cli():
+    pass
 
 
 cli.add_command(migration)

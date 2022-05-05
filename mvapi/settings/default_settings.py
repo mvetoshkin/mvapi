@@ -21,6 +21,32 @@ class DefaultSettings:
 
     # noinspection PyPep8Naming
     @property
+    def LOGGING(self):
+        return {
+            'version': 1,
+            'disable_existing_loggers': False,
+            'formatters': {
+                'standard': {
+                    'format': '%(asctime)s %(name)s %(levelname)s: %(message)s'
+                }
+            },
+            'handlers': {
+                'console': {
+                    'formatter': 'standard',
+                    'class': 'logging.StreamHandler'
+                }
+            },
+            'loggers': {
+                '': {
+                    'handlers': ['console'],
+                    'level': 'DEBUG' if self.DEBUG else 'INFO',
+                    'propagate': False
+                }
+            }
+        }
+
+    # noinspection PyPep8Naming
+    @property
     def SQLALCHEMY_DATABASE_URI(self):
         return self.DB_URI
 
