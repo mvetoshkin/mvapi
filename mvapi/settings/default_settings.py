@@ -48,7 +48,7 @@ class DefaultSettings:
         }
 
         if self.SYSLOG:
-            if type(self.SYSLOG) is not True:
+            if self.SYSLOG is not True:
                 syslog_addr = self.SYSLOG
             else:
                 if sys.platform == 'darwin':
@@ -68,6 +68,10 @@ class DefaultSettings:
                 'level': 'INFO',
                 'address': syslog_addr
             }
+
+            root_logger = config['loggers']['']
+            root_logger['handlers'].clear()
+            root_logger['handlers'].append('syslog')
 
         return config
 
