@@ -1,8 +1,7 @@
 import importlib
 import json
-import logging
-
 import time
+
 from flask import Flask, g, request
 from sqlalchemy import event
 from sqlalchemy.engine.base import Engine
@@ -18,8 +17,7 @@ from mvapi.web.libs.exceptions import AccessDeniedError, AppException, \
     NoExtensionException, NotAllowedError, UnauthorizedError, \
     UnexpectedArgumentsError
 from mvapi.web.libs.jsonwebtoken import JSONWebToken, JWTError
-
-logger = logging.getLogger(__name__)
+from mvapi.web.libs.logger import logger
 
 
 class AppFactory:

@@ -1,12 +1,11 @@
-import logging.config
 
 from click.exceptions import ClickException
 
 from mvapi.cli.project import cli
 from mvapi.libs.database import db
 from mvapi.libs.error import save_error
+from mvapi.libs.logger import init_logger
 from mvapi.models import import_models
-from mvapi.settings import settings
 from mvapi.web.libs.appfactory import create_app
 from mvapi.web.serializers import import_serializers
 from mvapi.web.views import import_views
@@ -16,9 +15,7 @@ def run_app(cli_=cli):
     import_models()
     import_views()
     import_serializers()
-
-    if settings.LOGGING:
-        logging.config.dictConfig(settings.LOGGING)
+    init_logger()
 
     if not cli_:
         return create_app()

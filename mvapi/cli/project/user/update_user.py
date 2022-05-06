@@ -1,11 +1,8 @@
-import logging
-
 import click
 
 from mvapi.libs.exceptions import NotFoundError
+from mvapi.libs.logger import logger
 from mvapi.web.models.user import User
-
-logger = logging.getLogger(__name__)
 
 
 @click.command('update-user')
