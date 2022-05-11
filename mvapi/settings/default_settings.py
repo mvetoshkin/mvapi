@@ -70,7 +70,6 @@ class DefaultSettings:
             }
 
             root_logger = config['loggers']['']
-            root_logger['handlers'].clear()
             root_logger['handlers'].append('syslog')
 
         return config
