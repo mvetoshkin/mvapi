@@ -25,7 +25,7 @@ setup(
         'flask == 2.0.2',
         'flask-cors == 3.0.10',
         'inflect == 5.4.0',
-        'jinja2 == 3.0.2',
+        'jinja2 == 3.0.3',
         'psycopg2 == 2.9.3',
         'pyjwt == 2.3.0',
         'python-dateutil==2.8.2',
