@@ -69,10 +69,13 @@ class BaseModel(declarative_base()):
 
     @declared_attr
     def __tablename__(self):
-        name = re.sub(r'(?<!^)(?=[A-Z])', '_', self.__name__).lower()
+        name = re.sub(r'((?<=[a-z\d])[A-Z]|(?!^)[A-Z](?=[a-z]))', r'_\1',
+                      self.__name__)
+
         if self.name_prefix:
             name = self.name_prefix + '_' + name
-        return name
+
+        return name.lower()
 
     @property
     def type_(self):
