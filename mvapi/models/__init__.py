@@ -45,6 +45,7 @@ class BaseQuery(Query):
 
         if limit:
             query = query.limit(limit)
+
         if offset:
             query = query.offset(offset)
 
