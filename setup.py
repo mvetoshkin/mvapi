@@ -11,7 +11,7 @@ setup(
     author='Mikhail Vetoshkin',
     author_email='mikhail@vetoshkin.dev',
     description='Skeleton for a JSON API project',
-    url='https://git.vetoshkin.dev/mvapi',
+    url='https://git.vetoshkin.dev/mvapi/',
     packages=find_packages(),
     package_data={
         '': ['templates/*']
