@@ -8,10 +8,11 @@ with open('./mvapi/version.py') as file:
 setup(
     name='mvapi',
     version=version,
+    description='Skeleton for a JSON API project',
+    license='GNU General Public License v3 (GPLv3)',
+    url='https://git.vetoshkin.dev/mvapi/',
     author='Mikhail Vetoshkin',
     author_email='mikhail@vetoshkin.dev',
-    description='Skeleton for a JSON API project',
-    url='https://git.vetoshkin.dev/mvapi/',
     packages=find_packages(),
     package_data={
         '': ['templates/*']
