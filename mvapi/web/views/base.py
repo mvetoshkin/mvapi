@@ -163,6 +163,29 @@ class BaseView:
                     f'Relationship {key} can\'t be null or empty'
                 )
 
+    def __get_api_response(self, data):
+        meta = None
+        if type(data) is tuple:
+            data, meta = data
+
+        if data is None:
+            data = self.resource
+
+        if isinstance(data, Query):
+            data = data.all()
+
+        return ApiResponse(
+            data=data,
+            meta=meta,
+            limit=self.limit,
+            current_page=self.current_page,
+            next_page=self.next_page,
+            cursor=self.cursor,
+            relationship_type=self.relationship_type,
+            related_relationship_type=self.related_relationship_type,
+            return_fields=self.return_fields
+        )
+
     def process_request(self):
         req_method = request.method.lower()
         self.__process_request_args()
@@ -183,14 +206,14 @@ class BaseView:
             f_name = f'process_{self.related_relationship_type}_relationship'
             func = getattr(self, f_name, None)
             if func:
-                return func()
+                data = func()
+                return self.__get_api_response(data)
 
             attr = getattr(self.resource, self.related_relationship_type, None)
             if attr:
                 if isinstance(attr, Query):
-                    return attr.apply_args(**self.common_args)
-                else:
-                    return attr
+                    attr = attr.apply_args(**self.common_args)
+                return self.__get_api_response(attr)
             else:
                 raise NotFoundError
 
@@ -223,28 +246,7 @@ class BaseView:
             self.resource = self.get_resource()
 
         data = method()
-
-        meta = None
-        if type(data) is tuple:
-            data, meta = data
-
-        if data is None:
-            data = self.resource
-
-        if isinstance(data, Query):
-            data = data.all()
-
-        return ApiResponse(
-            data=data,
-            meta=meta,
-            limit=self.limit,
-            current_page=self.current_page,
-            next_page=self.next_page,
-            cursor=self.cursor,
-            relationship_type=self.relationship_type,
-            related_relationship_type=self.related_relationship_type,
-            return_fields=self.return_fields
-        )
+        return self.__get_api_response(data)
 
     def available_data(self, include=None, exclude=None, required=None,
                        extra=None):
@@ -345,7 +347,13 @@ class BaseView:
             raise AccessDeniedError
 
     def process_sort_arg(self, value):
-        self.common_args['sort'] = self.resource_model.get_sort_fields(value)
+        model = self.resource_model
+
+        if self.related_relationship_type:
+            attr = getattr(model, self.related_relationship_type, None)
+            model = attr.property.mapper.entity
+
+        self.common_args['sort'] = model.get_sort_fields(value)
 
     def process_page_arg(self, page, value):
         page = page.lower()
