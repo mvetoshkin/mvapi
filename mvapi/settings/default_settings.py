@@ -25,28 +25,6 @@ class DefaultSettings:
     # noinspection PyPep8Naming
     @property
     def LOGGING(self):
-        config = {
-            'version': 1,
-            'disable_existing_loggers': False,
-            'formatters': {
-                'standard': {
-                    'format': '%(asctime)s %(name)s %(levelname)s: %(message)s'
-                }
-            },
-            'handlers': {
-                'console': {
-                    'formatter': 'standard',
-                    'class': 'logging.StreamHandler'
-                }
-            },
-            'loggers': {
-                '': {
-                    'handlers': ['console'],
-                    'level': 'DEBUG' if self.DEBUG else 'INFO'
-                }
-            }
-        }
-
         if self.SYSLOG:
             if self.SYSLOG is not True:
                 syslog_addr = self.SYSLOG
@@ -58,21 +36,50 @@ class DefaultSettings:
                 else:
                     syslog_addr = ('localhost', 514)
 
-            config['formatters']['syslog'] = {
-                'format': '%(name)s: %(message)s'
+            formatters = {
+                'syslog': {
+                    'format': '%(name)s: %(message)s'
+                }
             }
 
-            config['handlers']['syslog'] = {
-                'formatter': 'syslog',
-                'class': 'logging.handlers.SysLogHandler',
-                'level': 'INFO',
-                'address': syslog_addr
+            handlers = {
+                'syslog': {
+                    'formatter': 'syslog',
+                    'class': 'logging.handlers.SysLogHandler',
+                    'address': syslog_addr
+                }
             }
 
-            root_logger = config['loggers']['']
-            root_logger['handlers'].append('syslog')
+            root_logger_handlers = ['syslog']
 
-        return config
+        else:
+            formatters = {
+                'standard': {
+                    'format': '%(asctime)s %(name)s %(levelname)s: %(message)s'
+                }
+            }
+
+            handlers = {
+                'console': {
+                    'formatter': 'standard',
+                    'class': 'logging.StreamHandler'
+                }
+            }
+
+            root_logger_handlers = ['console']
+
+        return {
+            'version': 1,
+            'disable_existing_loggers': False,
+            'formatters': formatters,
+            'handlers': handlers,
+            'loggers': {
+                '': {
+                    'handlers': root_logger_handlers,
+                    'level': 'DEBUG' if self.DEBUG else 'INFO'
+                }
+            }
+        }
 
     # noinspection PyPep8Naming
     @property
