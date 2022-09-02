@@ -91,7 +91,7 @@ class DefaultSettings:
     def ROOT_LOGGER_NAME(self):
         return self.APP_NAME
 
-    def __getattr__(self, item):
-        if item in os.environ:
-            return os.environ[item]
-        raise KeyError
+    def __getattribute__(self, name):
+        if name in os.environ:
+            return os.environ[name]
+        return super(DefaultSettings, self).__getattribute__(name)
