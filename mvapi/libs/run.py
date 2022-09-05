@@ -1,4 +1,4 @@
-
+from blinker import signal
 from click.exceptions import ClickException
 
 from mvapi.cli.project import cli
@@ -10,12 +10,16 @@ from mvapi.web.libs.appfactory import create_app
 from mvapi.web.serializers import import_serializers
 from mvapi.web.views import import_views
 
+before_app_create = signal('mvapi.before_app_create')
+
 
 def run_app(cli_=cli):
     import_models()
     import_views()
     import_serializers()
     init_logger()
+
+    before_app_create.send(None)
 
     if not cli_:
         return create_app()

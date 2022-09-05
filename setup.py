@@ -25,6 +25,7 @@ setup(
     install_requires=[
         'alembic == 1.7.5',
         'bcrypt == 3.2.0',
+        'blinker == 1.5',
         'click == 8.0.3',
         'flask == 2.0.2',
         'flask-cors == 3.0.10',
