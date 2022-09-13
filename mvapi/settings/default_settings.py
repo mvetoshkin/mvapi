@@ -74,7 +74,7 @@ class DefaultSettings:
             'formatters': formatters,
             'handlers': handlers,
             'loggers': {
-                '': {
+                self.ROOT_LOGGER_NAME: {
                     'handlers': root_logger_handlers,
                     'level': 'DEBUG' if self.DEBUG else 'INFO'
                 }
