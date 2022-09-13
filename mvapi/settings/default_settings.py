@@ -76,7 +76,8 @@ class DefaultSettings:
             'loggers': {
                 self.ROOT_LOGGER_NAME: {
                     'handlers': root_logger_handlers,
-                    'level': 'DEBUG' if self.DEBUG else 'INFO'
+                    'level': 'DEBUG' if self.DEBUG else 'INFO',
+                    'propagate': False
                 }
             }
         }
