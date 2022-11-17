@@ -1,5 +1,5 @@
 from blinker import signal
-from click.exceptions import ClickException
+from click.exceptions import Abort, ClickException, Exit
 
 from mvapi.cli.project import cli
 from mvapi.libs.database import db
@@ -29,6 +29,8 @@ def run_app(cli_=cli):
             db.session.commit()
         except ClickException as exc:
             exc.show()
+        except (Abort, Exit):
+            db.session.rollback()
         except Exception as exc:
             db.session.rollback()
             save_error()
