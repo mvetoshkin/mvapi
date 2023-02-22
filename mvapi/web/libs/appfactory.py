@@ -3,8 +3,6 @@ import json
 import time
 
 from flask import Flask, g, request
-from sqlalchemy import event
-from sqlalchemy.engine.base import Engine
 from werkzeug.exceptions import HTTPException
 
 from mvapi.libs.database import db
@@ -190,21 +188,5 @@ def create_app():
             g.current_user = jwt.get_user(access_token)
         except (NotFoundError, JWTError):
             return None
-
-    if settings.DEBUG_SQL:
-        # noinspection PyUnusedLocal
-        @event.listens_for(Engine, 'before_cursor_execute')
-        def before_cursor_execute(conn, cursor, statement, parameters, context,
-                                  executemany):
-            conn.info.setdefault('query_start_time', []).append(time.time())
-            logger.debug(f'Start Query: {statement}. '
-                         f'With parameters: {parameters}')
-
-        # noinspection PyUnusedLocal
-        @event.listens_for(Engine, 'after_cursor_execute')
-        def after_cursor_execute(conn, cursor, statement, parameters, context,
-                                 executemany):
-            total = time.time() - conn.info['query_start_time'].pop(-1)
-            logger.debug(f'Query Complete. Total Time: {str(total)}\n')
 
     return app
