@@ -181,7 +181,7 @@ def create_app():
             raise BadRequestError('Wrong authorization header')
 
         if token_type.lower() != 'bearer':
-            raise BadRequestError('Wrong authorization token type')
+            return None
 
         try:
             jwt = JSONWebToken()
