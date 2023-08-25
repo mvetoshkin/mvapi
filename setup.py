@@ -10,7 +10,7 @@ setup(
     version=version,
     description='Skeleton for a JSON API project',
     license='GNU General Public License v3 (GPLv3)',
-    url='https://git.vetoshkin.dev/mvapi/',
+    url='https://github.com/mvetoshkin/mvapi',
     author='Mikhail Vetoshkin',
     author_email='mikhail@vetoshkin.dev',
     packages=find_packages(),
