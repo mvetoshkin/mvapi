@@ -1,3 +1,4 @@
+import json
 import re
 from copy import deepcopy
 
@@ -81,11 +82,15 @@ class BaseView:
         self.request_attrs = {}
         self.request_relationships = {}
 
-        try:
-            json_data = request.json or {}
-            json_data = json_data.get('data', {})
-        except BadRequest:
-            return
+        if 'multipart/form-data' in request.headers.get('Content-Type'):
+            json_data = json.loads(request.values.get('json', {}))
+        else:
+            try:
+                json_data = request.json or {}
+            except BadRequest:
+                return
+
+        json_data = json_data.get('data', {})
 
         if self.relationship_type:
             self.__process_relationship(relationship=self.relationship_type,
@@ -231,8 +236,7 @@ class BaseView:
         if not method:
             raise NotFoundError
 
-        if (req_method in ('post', 'patch', 'delete',) and
-                not request.files):
+        if req_method in ('post', 'patch', 'delete',):
             self.__process_json_data()
 
         # Disallow updating a whole relationship collection for a resource
